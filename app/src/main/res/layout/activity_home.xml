@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/home_main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -99,7 +100,7 @@
             android:hint="Search for clothes..."
             android:textColorHint="@color/text_hint"
             android:textColor="@color/text_primary"
-            android:textSize="16sp" />
+            android:textSize="20sp" />
 
     </LinearLayout>
 
@@ -184,7 +185,7 @@
             android:layout_height="wrap_content"
             android:text="View All"
             android:textColor="@color/primary_color"
-            android:textSize="14sp"
+            android:textSize="15sp"
             android:clickable="true"
             android:focusable="true" />
 
@@ -200,5 +201,12 @@
         android:layout_marginEnd="8dp"
         android:clipToPadding="false"
         android:paddingBottom="16dp" />
-
+    <!-- Bottom Navigation Bar -->
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottom_navigation"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        app:menu="@menu/bottom_nav_menu"
+        android:background="@color/background_secondary" />
 </RelativeLayout>

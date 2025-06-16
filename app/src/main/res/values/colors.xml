@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Màu chính của app -->
+    <color name="primary_color">#007AFF</color>
+    <color name="primary_dark">#005BB5</color>
+    <color name="primary_light">#4DA3FF</color>
+
+    <!-- Màu accent -->
+    <color name="accent_color">#FF6B35</color>
+
+    <!-- Màu text -->
+    <color name="text_primary">#000000</color>
+    <color name="text_secondary">#666666</color>
+    <color name="text_hint">#999999</color>
+
+    <!-- Màu background -->
+    <color name="background_primary">#FFFFFF</color>
+    <color name="background_secondary">#F5F5F5</color>
+    <color name="background_card">#F8F9FA</color>
+
+    <!-- Màu border -->
+    <color name="border_light">#E9ECEF</color>
+    <color name="border_medium">#DEE2E6</color>
+
+    <!-- Màu rating star -->
+    <color name="star_color">#FFB400</color>
+
+    <!-- Màu trạng thái -->
+    <color name="success_color">#28A745</color>
+    <color name="error_color">#DC3545</color>
+    <color name="warning_color">#FFC107</color>
+
+    <!-- Màu overlay -->
+    <color name="overlay_dark">#80000000</color>
+    <color name="overlay_light">#80FFFFFF</color>
+</resources>

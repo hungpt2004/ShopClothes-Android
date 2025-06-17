@@ -96,7 +96,7 @@
                 <ImageView
                     android:layout_width="16dp"
                     android:layout_height="16dp"
-                    android:src="@drawable/ic_star_border"/>
+                    android:src="@drawable/ic_star_border" />
 
                 <TextView
                     android:id="@+id/tvRating"
@@ -192,7 +192,7 @@
                     android:layout_gravity="center"
                     android:contentDescription="Add to Cart"
                     android:src="@drawable/ic_cart"
-                    />
+                />
 
             </FrameLayout>
 

@@ -2,15 +2,20 @@ package com.example.shopclothes_android;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.widget.ImageView;
-import android.widget.Toast;
+import android.view.MenuItem;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import java.util.Arrays;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
+import java.util.ArrayList;
 import java.util.List;
 
-public class HomeActivity extends AppCompatActivity {
+public class HomeActivity extends AppCompatActivity implements ProductAdapter.ProductClickListener {
+
+    private ProductAdapter adapter;
+    private BottomNavigationView bottomNavigationView;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -19,21 +24,47 @@ public class HomeActivity extends AppCompatActivity {
         RecyclerView rvProducts = findViewById(R.id.rvProducts);
         rvProducts.setLayoutManager(new LinearLayoutManager(this));
 
-        // Sample data
-        List<String> products = Arrays.asList("T-shirt", "Jeans", "Jacket", "Dress", "Shorts");
-        ProductAdapter adapter = new ProductAdapter(products);
+        // Create sample products with real prices
+        List<Product> products = new ArrayList<>();
+        products.add(new Product("T-shirt", 29.99, R.drawable.tshirt));
+        products.add(new Product("Jeans", 59.99, R.drawable.jeans));
+        products.add(new Product("Jacket", 89.99, R.drawable.jacket));
+        products.add(new Product("Dress", 79.99, R.drawable.dress));
+        products.add(new Product("Shorts", 39.99, R.drawable.shorts));
+
+        adapter = new ProductAdapter(products, this);
         rvProducts.setAdapter(adapter);
 
-        // Avatar click
-        ImageView imgAvatar = findViewById(R.id.imgAvatar);
-        imgAvatar.setOnClickListener(v -> {
-            // TODO: Chuyển tới ProfileActivity (chưa tạo)
-            Toast.makeText(HomeActivity.this, "Đi tới trang cá nhân (chưa tạo)", Toast.LENGTH_SHORT).show();
+        // Setup bottom navigation
+        bottomNavigationView = findViewById(R.id.bottom_navigation);
+        bottomNavigationView.setSelectedItemId(R.id.nav_home);
+
+        bottomNavigationView.setOnNavigationItemSelectedListener(item -> {
+            int itemId = item.getItemId();
+            if (itemId == R.id.nav_home) {
+                return true;
+            } else if (itemId == R.id.nav_cart) {
+                startActivity(new Intent(HomeActivity.this, CartActivity.class));
+                return true;
+            } else if (itemId == R.id.nav_favorite) {
+                startActivity(new Intent(HomeActivity.this, FavoritesActivity.class));
+                return true;
+            } else if (itemId == R.id.nav_profile) {
+                // TODO: Implement profile activity
+                return true;
+            }
+            return false;
         });
-        // Cart click
-        ImageView imgCart = findViewById(R.id.imgCart);
-        imgCart.setOnClickListener(v -> {
-            startActivity(new Intent(HomeActivity.this, CartActivity.class));
-        });
+    }
+
+    @Override
+    public void onFavoriteClicked(Product product) {
+        product.toggleFavorite();
+        adapter.notifyDataSetChanged();
+    }
+
+    @Override
+    public void onAddToCartClicked(Product product) {
+        CartManager.getInstance().addToCart(product);
     }
 }

@@ -3,6 +3,7 @@ package com.example.shopclothes_android;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.MenuItem;
+import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -66,5 +67,22 @@ public class HomeActivity extends AppCompatActivity implements ProductAdapter.Pr
     @Override
     public void onAddToCartClicked(Product product) {
         CartManager.getInstance().addToCart(product);
+    }
+
+    @Override
+    public void onProductClicked(Product product) {
+        try {
+            Intent intent = new Intent(this, ProductDetailActivity.class);
+            intent.putExtra("product_title", product.getName());
+            intent.putExtra("product_description", "Mô tả sản phẩm đang cập nhật...");
+            intent.putExtra("rating", 4.95f); // hoặc lấy từ product nếu có
+            intent.putExtra("review_count", 22); // hoặc lấy từ product nếu có
+            intent.putExtra("price", String.format("$%.2f", product.getPrice()));
+            intent.putExtra("total_price", String.format("$%.2f", product.getTotalPrice()));
+            intent.putExtra("product_image", product.getImageResId());
+            startActivity(intent);
+        } catch (Exception e) {
+            Toast.makeText(this, "Error opening product detail: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
     }
 }

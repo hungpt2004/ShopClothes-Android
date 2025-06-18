@@ -16,22 +16,26 @@
         <!-- Header với Back Button và Action Buttons -->
         <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="56dp"
+            android:layout_height="76dp"
             android:background="@android:color/white"
             android:elevation="2dp"
             android:paddingHorizontal="16dp">
 
             <!-- Back Button -->
+
+            <!-- Action Buttons Container -->
             <ImageButton
                 android:id="@+id/btn_back"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
                 android:layout_centerVertical="true"
+                android:layout_marginTop="16dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
-                android:src="@drawable/ic_arrow_back"
-                android:contentDescription="Back" />
+                android:clickable="true"
+                android:contentDescription="Back"
+                android:enabled="true"
+                android:src="@drawable/ic_arrow_back" />
 
-            <!-- Action Buttons Container -->
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -40,24 +44,25 @@
                 android:orientation="horizontal">
 
                 <!-- Share Button -->
+
+                <!-- Bookmark Button -->
                 <ImageButton
                     android:id="@+id/btn_share"
                     android:layout_width="40dp"
                     android:layout_height="40dp"
+                    android:layout_marginEnd="8dp"
                     android:background="?attr/selectableItemBackgroundBorderless"
-                    android:src="@drawable/ic_share"
                     android:contentDescription="Share"
-                    android:layout_marginEnd="8dp" />
+                    android:src="@drawable/ic_share" />
 
-                <!-- Bookmark Button -->
                 <ImageButton
                     android:id="@+id/btn_bookmark"
                     android:layout_width="40dp"
                     android:layout_height="40dp"
+                    android:layout_marginEnd="8dp"
                     android:background="?attr/selectableItemBackgroundBorderless"
-                    android:src="@drawable/ic_bookmark"
                     android:contentDescription="Bookmark"
-                    android:layout_marginEnd="8dp" />
+                    android:src="@drawable/ic_bookmark" />
 
                 <!-- More Options Button -->
                 <ImageButton
@@ -65,8 +70,8 @@
                     android:layout_width="40dp"
                     android:layout_height="40dp"
                     android:background="?attr/selectableItemBackgroundBorderless"
-                    android:src="@drawable/ic_more_vert"
-                    android:contentDescription="More Options" />
+                    android:contentDescription="More Options"
+                    android:src="@drawable/ic_more_vert" />
             </LinearLayout>
         </RelativeLayout>
 

@@ -7,6 +7,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 import java.text.NumberFormat;
 import java.util.List;
@@ -21,6 +22,8 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
         void onFavoriteClicked(Product product);
 
         void onAddToCartClicked(Product product);
+
+        void onProductClicked(Product product);
     }
 
     public ProductAdapter(List<Product> products, ProductClickListener listener) {
@@ -39,36 +42,64 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
 
     @Override
     public void onBindViewHolder(@NonNull ProductViewHolder holder, int position) {
-        Product product = products.get(position);
-        holder.tvProductName.setText(product.getName());
-        holder.imgProduct.setImageResource(product.getImageResId());
-        holder.tvPrice.setText(currencyFormatter.format(product.getPrice()));
+        try {
+            Product product = products.get(position);
+            holder.tvProductName.setText(product.getName());
+            holder.imgProduct.setImageResource(product.getImageResId());
+            holder.tvPrice.setText(currencyFormatter.format(product.getPrice()));
 
-        // Update favorite icon state
-        updateFavoriteIcon(holder.imgFavorite, product.isFavorite());
-
-        // Favorite button click
-        holder.imgFavorite.setOnClickListener(v -> {
-            listener.onFavoriteClicked(product);
+            // Update favorite icon state
             updateFavoriteIcon(holder.imgFavorite, product.isFavorite());
-            Toast.makeText(v.getContext(),
-                    product.isFavorite() ? "Đã thêm vào yêu thích" : "Đã xóa khỏi yêu thích",
-                    Toast.LENGTH_SHORT).show();
-        });
 
-        // Add to cart button click
-        holder.imgAddToCart.setOnClickListener(v -> {
-            listener.onAddToCartClicked(product);
-            Toast.makeText(v.getContext(),
-                    "Đã thêm " + product.getName() + " vào giỏ hàng!",
-                    Toast.LENGTH_SHORT).show();
-        });
+            // Favorite button click
+            holder.imgFavorite.setOnClickListener(v -> {
+                try {
+                    listener.onFavoriteClicked(product);
+                    updateFavoriteIcon(holder.imgFavorite, product.isFavorite());
+                    Toast.makeText(v.getContext(),
+                            product.isFavorite() ? "Đã thêm vào yêu thích" : "Đã xóa khỏi yêu thích",
+                            Toast.LENGTH_SHORT).show();
+                } catch (Exception e) {
+                    Toast.makeText(v.getContext(), "Error updating favorite", Toast.LENGTH_SHORT).show();
+                }
+            });
+
+            // Add to cart button click
+            holder.imgAddToCart.setOnClickListener(v -> {
+                try {
+                    listener.onAddToCartClicked(product);
+                    Toast.makeText(v.getContext(),
+                            "Đã thêm " + product.getName() + " vào giỏ hàng!",
+                            Toast.LENGTH_SHORT).show();
+                } catch (Exception e) {
+                    Toast.makeText(v.getContext(), "Error adding to cart", Toast.LENGTH_SHORT).show();
+                }
+            });
+
+            // Item click mở ProductDetailActivity
+            holder.itemView.setOnClickListener(v -> {
+                try {
+                    listener.onProductClicked(product);
+                } catch (Exception e) {
+                    Toast.makeText(v.getContext(), "Error opening product detail", Toast.LENGTH_SHORT).show();
+                }
+            });
+        } catch (Exception e) {
+            // Log error và không làm gì để tránh crash
+        }
     }
 
     private void updateFavoriteIcon(ImageView imageView, boolean isFavorite) {
-        imageView.setImageResource(isFavorite ? R.drawable.ic_heart_filled : R.drawable.ic_heart);
-        imageView.setColorFilter(isFavorite ? imageView.getContext().getColor(R.color.primary_color)
-                : imageView.getContext().getColor(R.color.text_hint));
+        try {
+            imageView.setImageResource(isFavorite ? R.drawable.ic_heart_filled : R.drawable.ic_heart);
+            int color = isFavorite ? 
+                ContextCompat.getColor(imageView.getContext(), R.color.primary_color) :
+                ContextCompat.getColor(imageView.getContext(), R.color.text_hint);
+            imageView.setColorFilter(color);
+        } catch (Exception e) {
+            // Fallback: chỉ đổi icon, không đổi màu
+            imageView.setImageResource(isFavorite ? R.drawable.ic_heart_filled : R.drawable.ic_heart);
+        }
     }
 
     @Override

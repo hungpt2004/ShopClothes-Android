@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "486096008636",
+    "firebase_url": "https://shopclothes-android-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "shopclothes-android",
+    "storage_bucket": "shopclothes-android.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:486096008636:android:f8a752d853d3d8442967b9",
+        "android_client_info": {
+          "package_name": "com.example.shopclothes_android"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDJz-GYzCF_b6Nd_DT84YMApXiA0MWZrWw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

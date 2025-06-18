@@ -1,3 +1,81 @@
 <resources>
-    <string name="app_name">product_detail</string>
+    <string name="app_name">MyApp</string>
+    <string name="app_logo">App Logo</string>
+
+    <!-- Login Screen -->
+    <string name="welcome_back">Welcome Back</string>
+    <string name="login_subtitle">Sign in to your account to continue</string>
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="forgot_password">Forgot Password?</string>
+    <string name="login">Login</string>
+    <string name="or">OR</string>
+    <string name="continue_with_google">Continue with Google</string>
+    <string name="continue_with_facebook">Continue with Facebook</string>
+    <string name="dont_have_account">Don\'t have an account?</string>
+    <string name="sign_up">Sign Up</string>
+    <string name="remember_me">Remember me</string>
+
+    <!-- Register Screen -->
+    <string name="create_account">Create Account</string>
+    <string name="register_subtitle">Fill in your information to get started</string>
+    <string name="full_name">Full Name</string>
+    <string name="phone_number">Phone Number</string>
+    <string name="confirm_password">Confirm Password</string>
+    <string name="agree_terms">I agree to the Terms of Service and Privacy Policy</string>
+    <string name="terms_of_service">Terms of Service</string>
+    <string name="privacy_policy">Privacy Policy</string>
+    <string name="already_have_account">Already have an account?</string>
+    <string name="sign_in">Sign In</string>
+    <string name="create_account_button">Create Account</string>
+
+    <!-- Forgot Password Screen -->
+    <string name="forgot_password_title">Forgot Password?</string>
+    <string name="forgot_password_subtitle">Don\'t worry! Enter your email address and we\'ll send you a link to reset your password.</string>
+    <string name="forgot_password_illustration">Forgot Password Illustration</string>
+    <string name="send_reset_link">Send Reset Link</string>
+    <string name="reset_link_sent">Reset link has been sent to your email!</string>
+    <string name="check_email">Please check your email for reset instructions</string>
+    <string name="remember_password">Remember your password?</string>
+    <string name="back_to_login">Back to Login</string>
+    <string name="resend_link">Resend Link</string>
+
+    <!-- Common UI Elements -->
+    <string name="back">Back</string>
+    <string name="next">Next</string>
+    <string name="finish">Finish</string>
+    <string name="cancel">Cancel</string>
+    <string name="confirm">Confirm</string>
+    <string name="ok">OK</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="loading">Loading...</string>
+    <string name="please_wait">Please wait...</string>
+
+    <!-- Error Messages -->
+    <string name="error_email_empty">Email cannot be empty</string>
+    <string name="error_email_invalid">Please enter a valid email address</string>
+    <string name="error_password_empty">Password cannot be empty</string>
+    <string name="error_password_short">Password must be at least 6 characters</string>
+    <string name="error_password_mismatch">Passwords do not match</string>
+    <string name="error_name_empty">Full name cannot be empty</string>
+    <string name="error_phone_empty">Phone number cannot be empty</string>
+    <string name="error_phone_invalid">Please enter a valid phone number</string>
+    <string name="error_terms_not_accepted">Please accept the terms and conditions</string>
+    <string name="error_network">Network error. Please check your connection</string>
+    <string name="error_login_failed">Login failed. Please try again</string>
+    <string name="error_registration_failed">Registration failed. Please try again</string>
+
+    <!-- Success Messages -->
+    <string name="success_login">Login successful!</string>
+    <string name="success_registration">Account created successfully!</string>
+    <string name="success_password_reset">Password reset link sent!</string>
+
+    <!-- Content Descriptions -->
+    <string name="cd_show_password">Show password</string>
+    <string name="cd_hide_password">Hide password</string>
+    <string name="cd_back_button">Back button</string>
+    <string name="cd_logo">Application logo</string>
+    <string name="cd_google_icon">Google icon</string>
+    <string name="cd_facebook_icon">Facebook icon</string>
 </resources>

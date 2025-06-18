@@ -1,0 +1,8 @@
+<!-- res/drawable/ic_cart.xml -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp" android:height="24dp"
+    android:viewportWidth="24" android:viewportHeight="24">
+    <path
+        android:fillColor="#000000"
+        android:pathData="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zm10 0c-1.1 0-1.99.9-1.99 2S15.9 22 17 22s2-.9 2-2-.9-2-2-2zM7.16 14l.84-2h8.99l1.24 3H7.16zm12.43-5l-1.25 3H7.31l-1.1-2H2V8h3l3.6 7.59 1.16-2.35L14.25 14H20v-2h-2.41z"/>
+</vector>

@@ -1,4 +1,4 @@
-package com.example.product_detail;
+package com.example.shopclothes_android;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;

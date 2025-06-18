@@ -17,6 +17,7 @@
         <activity android:name=".HomeActivity" android:exported="true" />
         <activity android:name=".RegisterActivity" android:exported="true" />
         <activity android:name=".ForgotPasswordActivity" android:exported="true" />
+        <activity android:name=".ProductDetailActivity" android:exported="false" />
 
         <!-- Đặt LoginActivity làm màn đầu tiên khi mở app -->
         <activity android:name=".LoginActivity" android:exported="true">

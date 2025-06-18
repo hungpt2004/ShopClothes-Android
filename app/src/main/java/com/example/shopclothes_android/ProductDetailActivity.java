@@ -18,12 +18,16 @@ public class ProductDetailActivity extends AppCompatActivity {
     // ViewModel để quản lý state
     private ProductDetailViewModel viewModel;
 
+    // Lưu thông tin sản phẩm hiện tại để thêm vào cart
+    private Product currentProduct;
+
     // UI Components
     private ImageButton btnBack, btnShare, btnBookmark, btnMore;
     private ImageView imgProduct, imgSellerAvatar;
     private TextView tvImageCounter, tvRating, tvReviewCount, tvProductTitle;
-    private TextView tvBeds, tvBath, tvSize, tvPeople;
-    private TextView tvSellerName, tvSellerDescription, tvDescription, tvMore;
+    private TextView tvTrouser, tvBath, tvSize, tvPeople;
+    private TextView tvSellerName, tvSellerDescription;
+    private TextView tvDescription, tvMore;
     private TextView tvPrice, tvTotalPrice;
     private Button btnBook;
 
@@ -49,27 +53,32 @@ public class ProductDetailActivity extends AppCompatActivity {
     }
 
     private void initViews() {
-        btnBack = findViewById(R.id.btn_back);
-        btnShare = findViewById(R.id.btn_share);
-        btnBookmark = findViewById(R.id.btn_bookmark);
-        btnMore = findViewById(R.id.btn_more);
-        imgProduct = findViewById(R.id.img_product);
-        tvImageCounter = findViewById(R.id.tv_image_counter);
-        tvRating = findViewById(R.id.tv_rating);
-        tvReviewCount = findViewById(R.id.tv_review_count);
-        tvProductTitle = findViewById(R.id.tv_product_title);
-        tvBeds = findViewById(R.id.tv_trouser);
-        tvBath = findViewById(R.id.tv_bath);
-        tvSize = findViewById(R.id.tv_size);
-        tvPeople = findViewById(R.id.tv_people);
-        imgSellerAvatar = findViewById(R.id.img_seller_avatar);
-        tvSellerName = findViewById(R.id.tv_seller_name);
-        tvSellerDescription = findViewById(R.id.tv_seller_description);
-        tvDescription = findViewById(R.id.tv_description);
-        tvMore = findViewById(R.id.tv_more);
-        tvPrice = findViewById(R.id.tv_price);
-        tvTotalPrice = findViewById(R.id.tv_total_price);
-        btnBook = findViewById(R.id.btn_book);
+        try {
+            btnBack = findViewById(R.id.btn_back);
+            btnShare = findViewById(R.id.btn_share);
+            btnBookmark = findViewById(R.id.btn_bookmark);
+            btnMore = findViewById(R.id.btn_more);
+            imgProduct = findViewById(R.id.img_product);
+            tvImageCounter = findViewById(R.id.tv_image_counter);
+            tvRating = findViewById(R.id.tv_rating);
+            tvReviewCount = findViewById(R.id.tv_review_count);
+            tvProductTitle = findViewById(R.id.tv_product_title);
+            tvTrouser = findViewById(R.id.tv_trouser);
+            tvBath = findViewById(R.id.tv_bath);
+            tvSize = findViewById(R.id.tv_size);
+            tvPeople = findViewById(R.id.tv_people);
+            imgSellerAvatar = findViewById(R.id.img_seller_avatar);
+            tvSellerName = findViewById(R.id.tv_seller_name);
+            tvSellerDescription = findViewById(R.id.tv_seller_description);
+            tvDescription = findViewById(R.id.tv_description);
+            tvMore = findViewById(R.id.tv_more);
+            tvPrice = findViewById(R.id.tv_price);
+            tvTotalPrice = findViewById(R.id.tv_total_price);
+            btnBook = findViewById(R.id.btn_book);
+        } catch (Exception e) {
+            Toast.makeText(this, "Error initializing views: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            finish();
+        }
     }
 
     /**
@@ -117,23 +126,30 @@ public class ProductDetailActivity extends AppCompatActivity {
     }
 
     private void setupClickListeners() {
-        btnBack.setOnClickListener(v -> onBackPressed());
+        try {
+            if (btnBack != null) btnBack.setOnClickListener(v -> {
+                Toast.makeText(this, "Back button clicked", Toast.LENGTH_SHORT).show();
+                onBackPressed();
+            });
 
-        btnShare.setOnClickListener(v -> shareProduct());
+            if (btnShare != null) btnShare.setOnClickListener(v -> shareProduct());
 
-        btnBookmark.setOnClickListener(v -> {
-            viewModel.toggleBookmark();
-        });
+            if (btnBookmark != null) btnBookmark.setOnClickListener(v -> {
+                viewModel.toggleBookmark();
+            });
 
-        btnMore.setOnClickListener(v -> showMoreOptions());
+            if (btnMore != null) btnMore.setOnClickListener(v -> showMoreOptions());
 
-        tvMore.setOnClickListener(v -> {
-            viewModel.toggleDescription();
-        });
+            if (tvMore != null) tvMore.setOnClickListener(v -> {
+                viewModel.toggleDescription();
+            });
 
-        btnBook.setOnClickListener(v -> bookProduct());
+            if (btnBook != null) btnBook.setOnClickListener(v -> bookProduct());
 
-        imgProduct.setOnClickListener(v -> openImageGallery());
+            if (imgProduct != null) imgProduct.setOnClickListener(v -> openImageGallery());
+        } catch (Exception e) {
+            Toast.makeText(this, "Error setting up click listeners: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
     }
 
     /**
@@ -148,6 +164,31 @@ public class ProductDetailActivity extends AppCompatActivity {
             int reviewCount = intent.getIntExtra("review_count", 22);
             String price = intent.getStringExtra("price");
             String totalPrice = intent.getStringExtra("total_price");
+            int imageResId = intent.getIntExtra("product_image", R.drawable.placeholder_product);
+
+            // Đặt giá trị mặc định nếu null
+            if (title == null) title = "Product Title";
+            if (description == null) description = "Product description...";
+            if (price == null) price = "$0.00";
+            if (totalPrice == null) totalPrice = "$0.00";
+
+            // Tạo Product object từ dữ liệu Intent để có thể thêm vào cart
+            try {
+                // Lấy giá từ string (loại bỏ ký tự $)
+                double productPrice = Double.parseDouble(price.replace("$", ""));
+                currentProduct = new Product(title, productPrice, imageResId);
+            } catch (Exception e) {
+                currentProduct = new Product(title, 0.0, imageResId);
+            }
+
+            // Cập nhật ảnh sản phẩm
+            if (imgProduct != null) {
+                try {
+                    imgProduct.setImageResource(imageResId);
+                } catch (Exception e) {
+                    imgProduct.setImageResource(R.drawable.placeholder_product);
+                }
+            }
 
             // Update ViewModel với data từ Intent
             viewModel.loadProductData(title, description, rating, reviewCount, price, totalPrice);
@@ -158,26 +199,32 @@ public class ProductDetailActivity extends AppCompatActivity {
      * Cập nhật UI khi product state thay đổi
      */
     private void updateProductUI(ProductDetailViewModel.ProductState state) {
-        tvProductTitle.setText(state.title);
-        tvDescription.setText(state.description);
-        tvRating.setText(String.valueOf(state.rating));
-        tvReviewCount.setText(state.reviewCount + " reviews");
-        tvPrice.setText(state.price);
-        tvTotalPrice.setText(state.totalPrice);
+        if (tvProductTitle != null) tvProductTitle.setText(state.title);
+        if (tvDescription != null) tvDescription.setText(state.description);
+        if (tvRating != null) tvRating.setText(String.valueOf(state.rating));
+        if (tvReviewCount != null) tvReviewCount.setText(state.reviewCount + " reviews");
+        if (tvPrice != null) tvPrice.setText(state.price);
+        if (tvTotalPrice != null) tvTotalPrice.setText(state.totalPrice);
     }
 
     /**
      * Cập nhật UI khi bookmark state thay đổi
      */
     private void updateBookmarkUI(Boolean isBookmarked) {
-        if (isBookmarked) {
-            btnBookmark.setImageResource(R.drawable.ic_bookmark_filled);
-            Toast.makeText(this, "Added to bookmarks", Toast.LENGTH_SHORT).show();
-            saveBookmarkToDatabase();
-        } else {
-            btnBookmark.setImageResource(R.drawable.ic_bookmark);
-            Toast.makeText(this, "Removed from bookmarks", Toast.LENGTH_SHORT).show();
-            removeBookmarkFromDatabase();
+        if (btnBookmark != null) {
+            try {
+                if (isBookmarked) {
+                    btnBookmark.setImageResource(R.drawable.ic_bookmark_filled);
+                    Toast.makeText(this, "Added to bookmarks", Toast.LENGTH_SHORT).show();
+                    saveBookmarkToDatabase();
+                } else {
+                    btnBookmark.setImageResource(R.drawable.ic_bookmark);
+                    Toast.makeText(this, "Removed from bookmarks", Toast.LENGTH_SHORT).show();
+                    removeBookmarkFromDatabase();
+                }
+            } catch (Exception e) {
+                Toast.makeText(this, "Error updating bookmark UI: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            }
         }
     }
 
@@ -211,18 +258,23 @@ public class ProductDetailActivity extends AppCompatActivity {
     }
 
     private void bookProduct() {
-        if (!isUserLoggedIn()) {
-            // Thay vì chuyển đến LoginActivity, hiển thị Toast thông báo
-            Toast.makeText(this, "Please login to book this product", Toast.LENGTH_LONG).show();
+        if (currentProduct == null) {
+            Toast.makeText(this, "Product information not available", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        ProductDetailViewModel.ProductState state = viewModel.getProductState().getValue();
-        if (state != null) {
-            // Thay vì chuyển đến CheckoutActivity, hiển thị Toast thông báo
-            Toast.makeText(this, "Booking: " + state.title + " - " + state.price, Toast.LENGTH_LONG).show();
-            // Có thể thêm dialog confirmation hoặc bottom sheet
-            showBookingConfirmation(state);
+        try {
+            // Thêm sản phẩm vào cart
+            CartManager.getInstance().addToCart(currentProduct);
+            
+            // Hiển thị thông báo thành công
+            Toast.makeText(this, "Đã thêm " + currentProduct.getName() + " vào giỏ hàng!", Toast.LENGTH_SHORT).show();
+            
+            // Hiển thị dialog xác nhận với tùy chọn đi đến cart
+            showAddToCartConfirmation();
+            
+        } catch (Exception e) {
+            Toast.makeText(this, "Error adding to cart: " + e.getMessage(), Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -233,16 +285,18 @@ public class ProductDetailActivity extends AppCompatActivity {
     }
 
     /**
-     * Hiển thị dialog xác nhận booking (thay thế cho CheckoutActivity tạm thời)
+     * Hiển thị dialog xác nhận sau khi thêm vào cart
      */
-    private void showBookingConfirmation(ProductDetailViewModel.ProductState state) {
+    private void showAddToCartConfirmation() {
         new androidx.appcompat.app.AlertDialog.Builder(this)
-                .setTitle("Confirm Booking")
-                .setMessage("Do you want to book: " + state.title + "\nPrice: " + state.price + "\nTotal: " + state.totalPrice)
-                .setPositiveButton("Confirm", (dialog, which) -> {
-                    Toast.makeText(this, "Booking confirmed! (Demo)", Toast.LENGTH_LONG).show();
+                .setTitle("Đã thêm vào giỏ hàng")
+                .setMessage("Sản phẩm đã được thêm vào giỏ hàng thành công!\nBạn có muốn xem giỏ hàng không?")
+                .setPositiveButton("Xem giỏ hàng", (dialog, which) -> {
+                    // Chuyển đến CartActivity
+                    Intent intent = new Intent(this, CartActivity.class);
+                    startActivity(intent);
                 })
-                .setNegativeButton("Cancel", null)
+                .setNegativeButton("Tiếp tục mua sắm", null)
                 .show();
     }
 

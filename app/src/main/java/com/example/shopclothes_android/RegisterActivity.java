@@ -95,17 +95,25 @@ public class RegisterActivity extends AppCompatActivity {
         boolean isValid = validateInputs(fullName, email, phone, password, confirmPassword);
 
         if (isValid) {
-            // Simulate registration process
             btnCreateAccount.setText(getString(R.string.loading));
             btnCreateAccount.setEnabled(false);
 
-            // Simulate network delay
             btnCreateAccount.postDelayed(() -> {
+                // Lưu user mockdata vào ProfileManager
+                ProfileManager profileManager = ProfileManager.getInstance();
+                profileManager.initialize(getApplicationContext());
+                User user = new User();
+                user.setName(fullName);
+                user.setEmail(email);
+                user.setPhone(phone);
+                user.setBirthDate("01/01/2000");
+                user.setGender("Nam");
+                profileManager.saveUser(user);
+
                 Toast.makeText(this, getString(R.string.success_registration), Toast.LENGTH_SHORT).show();
-                
-                // Go to login screen
+                // Quay về LoginActivity để đăng nhập tài khoản vừa đăng ký
                 Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivity(intent);
                 finish();
             }, 2000);

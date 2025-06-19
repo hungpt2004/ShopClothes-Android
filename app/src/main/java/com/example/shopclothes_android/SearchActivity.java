@@ -2,65 +2,71 @@ package com.example.shopclothes_android;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.MenuItem;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.widget.EditText;
 import android.widget.Toast;
-import androidx.annotation.NonNull;
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import com.google.android.material.bottomnavigation.BottomNavigationView;
 import java.util.ArrayList;
 import java.util.List;
 
-public class HomeActivity extends AppCompatActivity implements ProductAdapter.ProductClickListener {
-
+public class SearchActivity extends AppCompatActivity implements ProductAdapter.ProductClickListener {
     private ProductAdapter adapter;
-    private BottomNavigationView bottomNavigationView;
+    private List<Product> allProducts;
+    private List<Product> filteredProducts;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_home);
+        setContentView(R.layout.activity_search);
 
+        // Xử lý nút back trên toolbar
+        androidx.appcompat.widget.Toolbar toolbar = findViewById(R.id.toolbar);
+        toolbar.setNavigationOnClickListener(v -> finish());
+
+        EditText etSearch = findViewById(R.id.etSearch);
         RecyclerView rvProducts = findViewById(R.id.rvProducts);
         rvProducts.setLayoutManager(new LinearLayoutManager(this));
 
-        // Create sample products with real prices
-        List<Product> products = new ArrayList<>();
-        products.add(new Product("T-shirt", 29.99, R.drawable.tshirt));
-        products.add(new Product("Jeans", 59.99, R.drawable.jeans));
-        products.add(new Product("Jacket", 89.99, R.drawable.jacket));
-        products.add(new Product("Dress", 79.99, R.drawable.dress));
-        products.add(new Product("Shorts", 39.99, R.drawable.shorts));
+        // Sample data (có thể lấy từ intent hoặc static)
+        allProducts = new ArrayList<>();
+        allProducts.add(new Product("T-shirt", 29.99, R.drawable.tshirt));
+        allProducts.add(new Product("Jeans", 59.99, R.drawable.jeans));
+        allProducts.add(new Product("Jacket", 89.99, R.drawable.jacket));
+        allProducts.add(new Product("Dress", 79.99, R.drawable.dress));
+        allProducts.add(new Product("Shorts", 39.99, R.drawable.shorts));
 
-        adapter = new ProductAdapter(products, this);
+        filteredProducts = new ArrayList<>(allProducts);
+        adapter = new ProductAdapter(filteredProducts, this);
         rvProducts.setAdapter(adapter);
 
-        // Setup bottom navigation
-        bottomNavigationView = findViewById(R.id.bottom_navigation);
-        bottomNavigationView.setSelectedItemId(R.id.nav_home);
-
-        bottomNavigationView.setOnNavigationItemSelectedListener(item -> {
-            int itemId = item.getItemId();
-            if (itemId == R.id.nav_home) {
-                return true;
-            } else if (itemId == R.id.nav_cart) {
-                startActivity(new Intent(HomeActivity.this, CartActivity.class));
-                return true;
-            } else if (itemId == R.id.nav_favorite) {
-                startActivity(new Intent(HomeActivity.this, FavoritesActivity.class));
-                return true;
-            } else if (itemId == R.id.nav_profile) {
-                startActivity(new Intent(HomeActivity.this, ProfileActivity.class));
-                return true;
+        etSearch.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                filterProducts(s.toString());
             }
-            return false;
+            @Override
+            public void afterTextChanged(Editable s) {}
         });
+    }
 
-        // Sự kiện mở SearchActivity khi click vào search bar
-        findViewById(R.id.search_container).setOnClickListener(v -> {
-            startActivity(new Intent(HomeActivity.this, SearchActivity.class));
-        });
+    private void filterProducts(String query) {
+        filteredProducts.clear();
+        if (query.isEmpty()) {
+            filteredProducts.addAll(allProducts);
+        } else {
+            for (Product p : allProducts) {
+                if (p.getName().toLowerCase().contains(query.toLowerCase())) {
+                    filteredProducts.add(p);
+                }
+            }
+        }
+        adapter.notifyDataSetChanged();
     }
 
     @Override

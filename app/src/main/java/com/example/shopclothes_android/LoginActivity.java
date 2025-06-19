@@ -88,19 +88,44 @@ public class LoginActivity extends AppCompatActivity {
         }
 
         if (isValid) {
-            // Simulate login process
             btnLogin.setText(getString(R.string.loading));
             btnLogin.setEnabled(false);
 
-            // Simulate network delay
             btnLogin.postDelayed(() -> {
-                // For demo purposes, accept any valid email/password
-                Toast.makeText(this, getString(R.string.success_login), Toast.LENGTH_SHORT).show();
-                
-                Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
-                startActivity(intent);
-                finish();
-            }, 1500);
+                ProfileManager profileManager = ProfileManager.getInstance();
+                profileManager.initialize(getApplicationContext());
+                User user = profileManager.getCurrentUser();
+                // Nếu đúng tài khoản mẫu hoặc đúng tài khoản đã đăng ký
+                boolean isDefault = email.equals("nguyenvanan@gmail.com") && password.equals("12345678");
+                boolean isRegistered = user != null && email.equals(user.getEmail()) && !user.getEmail().isEmpty();
+                if ((isDefault && password.equals("12345678")) || (isRegistered && password.equals("12345678"))) {
+                    if (isDefault) {
+                        // Lưu user mẫu vào ProfileManager
+                        User defaultUser = new User();
+                        defaultUser.setName("Nguyễn Văn An");
+                        defaultUser.setEmail("nguyenvanan@gmail.com");
+                        defaultUser.setPhone("0123 456 789");
+                        defaultUser.setBirthDate("15/03/1995");
+                        defaultUser.setGender("Nam");
+                        defaultUser.setAvatarPath("");
+                        profileManager.saveUser(defaultUser);
+                    }
+                    Toast.makeText(this, getString(R.string.success_login), Toast.LENGTH_SHORT).show();
+                    Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
+                    startActivity(intent);
+                    finish();
+                } else if (isRegistered && password.equals("12345678")) {
+                    // Đăng nhập user đã đăng ký
+                    Toast.makeText(this, getString(R.string.success_login), Toast.LENGTH_SHORT).show();
+                    Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
+                    startActivity(intent);
+                    finish();
+                } else {
+                    btnLogin.setText(getString(R.string.login));
+                    btnLogin.setEnabled(true);
+                    Toast.makeText(this, getString(R.string.error_login_failed), Toast.LENGTH_SHORT).show();
+                }
+            }, 1000);
         }
     }
 }

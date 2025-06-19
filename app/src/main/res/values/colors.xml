@@ -84,4 +84,8 @@
     <color name="gradient_center">#9C27B0</color>
     <color name="gradient_end">#673AB7</color>
 
+    <color name="background">#FAFAFA</color>
+
+    <color name="white">#FFFFFF</color>
+
 </resources>

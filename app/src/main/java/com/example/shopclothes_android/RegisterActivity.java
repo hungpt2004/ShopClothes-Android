@@ -125,6 +125,7 @@ public class RegisterActivity extends AppCompatActivity {
                             userData.put("gender", defaultGender);
                             userData.put("avatarUrl", defaultAvatarUrl);
                             userData.put("createdAt", new java.util.Date());
+                            userData.put("isBanned", false);
 
                             // Save to Firestore
                             db.collection("users").document(firebaseUser.getUid())

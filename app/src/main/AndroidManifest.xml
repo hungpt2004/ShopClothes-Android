@@ -19,6 +19,7 @@
         <activity android:name=".ForgotPasswordActivity" android:exported="true" />
         <activity android:name=".ProductDetailActivity" android:exported="false" />
         <activity android:name=".ProfileActivity" android:exported="false" />
+        <activity android:name=".EditProfileActivity" />
         <!-- Đặt LoginActivity làm màn đầu tiên khi mở app -->
         <activity android:name=".LoginActivity" android:exported="true">
             <intent-filter>
@@ -31,6 +32,9 @@
         <activity android:name=".FavoritesActivity" />
         <activity android:name=".SearchActivity" android:exported="true" />
         <activity android:name=".AdminDashboardActivity" />
+        <activity android:name=".UserDetailActivity" />
+        <activity android:name=".SettingsActivity" />
+        <activity android:name=".ChangePasswordActivity" />
     </application>
 
 </manifest>

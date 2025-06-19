@@ -14,6 +14,7 @@ import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import android.util.Log;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -23,6 +24,7 @@ public class LoginActivity extends AppCompatActivity {
     private TextView tvForgotPassword, tvSignup;
     private LinearLayout llSignup;
     private FirebaseAuth mAuth;
+    private FirebaseFirestore db;
     private static final String TAG = "LoginActivity";
     private static final String ADMIN_EMAIL = "admin@gmail.com";
     private static final String ADMIN_PASSWORD = "admin123";
@@ -33,6 +35,7 @@ public class LoginActivity extends AppCompatActivity {
         setContentView(R.layout.activity_login);
 
         mAuth = FirebaseAuth.getInstance();
+        db = FirebaseFirestore.getInstance();
         initViews();
         setupClickListeners();
     }
@@ -112,27 +115,48 @@ public class LoginActivity extends AppCompatActivity {
                     .addOnCompleteListener(this, task -> {
                         if (task.isSuccessful()) {
                             FirebaseUser firebaseUser = mAuth.getCurrentUser();
-                            // Load user data from ProfileManager
-                            ProfileManager profileManager = ProfileManager.getInstance();
-                            profileManager.initialize(getApplicationContext());
-                            User user = profileManager.getCurrentUser();
+                            if (firebaseUser != null) {
+                                db.collection("users").document(firebaseUser.getUid()).get()
+                                        .addOnSuccessListener(document -> {
+                                            Boolean isBanned = document.getBoolean("isBanned");
+                                            if (isBanned != null && isBanned) {
+                                                FirebaseAuth.getInstance().signOut();
+                                                btnLogin.setText(getString(R.string.login));
+                                                btnLogin.setEnabled(true);
+                                                Toast.makeText(this, "Your account has been banned.", Toast.LENGTH_LONG)
+                                                        .show();
+                                            } else {
+                                                // Load user data from ProfileManager
+                                                ProfileManager profileManager = ProfileManager.getInstance();
+                                                profileManager.initialize(getApplicationContext());
+                                                User user = profileManager.getCurrentUser();
 
-                            // If user doesn't exist in ProfileManager, create default user
-                            if (user == null || user.getEmail().isEmpty()) {
-                                user = new User();
-                                user.setName("User");
-                                user.setEmail(email);
-                                user.setPhone("");
-                                user.setBirthDate("01/01/2000");
-                                user.setGender("Other");
-                                user.setAvatarPath("https://ui-avatars.com/api/?name=User");
-                                profileManager.saveUser(user);
+                                                // If user doesn't exist in ProfileManager, create default user
+                                                if (user == null || user.getEmail().isEmpty()) {
+                                                    user = new User();
+                                                    user.setName("User");
+                                                    user.setEmail(email);
+                                                    user.setPhone("");
+                                                    user.setBirthDate("01/01/2000");
+                                                    user.setGender("Other");
+                                                    user.setAvatarPath("https://ui-avatars.com/api/?name=User");
+                                                    profileManager.saveUser(user);
+                                                }
+
+                                                Toast.makeText(this, getString(R.string.success_login),
+                                                        Toast.LENGTH_SHORT).show();
+                                                Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
+                                                startActivity(intent);
+                                                finish();
+                                            }
+                                        })
+                                        .addOnFailureListener(e -> {
+                                            btnLogin.setText(getString(R.string.login));
+                                            btnLogin.setEnabled(true);
+                                            Toast.makeText(this, "Failed to check account status.", Toast.LENGTH_LONG)
+                                                    .show();
+                                        });
                             }
-
-                            Toast.makeText(this, getString(R.string.success_login), Toast.LENGTH_SHORT).show();
-                            Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
-                            startActivity(intent);
-                            finish();
                         } else {
                             btnLogin.setText(getString(R.string.login));
                             btnLogin.setEnabled(true);

@@ -13,6 +13,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import de.hdodenhof.circleimageview.CircleImageView;
 import com.bumptech.glide.Glide;
 import com.google.firebase.auth.FirebaseAuth;
+import android.app.Activity;
 
 public class ProfileActivity extends AppCompatActivity {
 
@@ -23,6 +24,7 @@ public class ProfileActivity extends AppCompatActivity {
 	private Button btnEditProfile, btnAddAddress;
 	private LinearLayout layoutMyOrders, layoutWishlist, layoutLogout;
 	private BottomNavigationView bottomNavigation;
+	private static final int EDIT_PROFILE_REQUEST = 101;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -85,7 +87,10 @@ public class ProfileActivity extends AppCompatActivity {
 			imgAvatar.setOnClickListener(v -> openImagePicker());
 		if (btnEditProfile != null)
 			btnEditProfile.setOnClickListener(
-					v -> Toast.makeText(this, "Edit Profile feature coming soon!", Toast.LENGTH_SHORT).show());
+					v -> {
+						Intent intent = new Intent(this, EditProfileActivity.class);
+						startActivityForResult(intent, EDIT_PROFILE_REQUEST);
+					});
 		if (btnManageAddress != null)
 			btnManageAddress.setOnClickListener(
 					v -> Toast.makeText(this, "Address Management feature coming soon!", Toast.LENGTH_SHORT).show());
@@ -130,6 +135,10 @@ public class ProfileActivity extends AppCompatActivity {
 			} catch (Exception e) {
 				Toast.makeText(this, "Failed to update avatar", Toast.LENGTH_SHORT).show();
 			}
+		}
+		if (requestCode == EDIT_PROFILE_REQUEST && resultCode == Activity.RESULT_OK) {
+			// Reload user data after editing
+			loadUserData();
 		}
 	}
 

@@ -12,7 +12,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/primary_color"
-        android:title="Tìm kiếm sản phẩm"
+        android:title="Search Products"
         android:titleTextColor="@color/background_secondary"
         app:navigationIcon="@drawable/ic_arrow_back"
         app:titleCentered="true" />
@@ -40,7 +40,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:background="@android:color/transparent"
-            android:hint="Tìm kiếm sản phẩm..."
+            android:hint="Search products..."
             android:textColorHint="@color/text_hint"
             android:textColor="@color/text_primary"
             android:textSize="18sp" />

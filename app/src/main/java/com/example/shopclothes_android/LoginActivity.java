@@ -11,6 +11,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import android.util.Log;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -19,12 +22,17 @@ public class LoginActivity extends AppCompatActivity {
     private MaterialButton btnLogin, btnGoogleSignin;
     private TextView tvForgotPassword, tvSignup;
     private LinearLayout llSignup;
+    private FirebaseAuth mAuth;
+    private static final String TAG = "LoginActivity";
+    private static final String ADMIN_EMAIL = "admin@gmail.com";
+    private static final String ADMIN_PASSWORD = "admin123";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
+        mAuth = FirebaseAuth.getInstance();
         initViews();
         setupClickListeners();
     }
@@ -43,16 +51,16 @@ public class LoginActivity extends AppCompatActivity {
 
     private void setupClickListeners() {
         btnLogin.setOnClickListener(v -> performLogin());
-        
+
         btnGoogleSignin.setOnClickListener(v -> {
             Toast.makeText(this, "Google Sign-in coming soon!", Toast.LENGTH_SHORT).show();
         });
-        
+
         tvForgotPassword.setOnClickListener(v -> {
             Intent intent = new Intent(LoginActivity.this, ForgotPasswordActivity.class);
             startActivity(intent);
         });
-        
+
         llSignup.setOnClickListener(v -> {
             Intent intent = new Intent(LoginActivity.this, RegisterActivity.class);
             startActivity(intent);
@@ -91,42 +99,52 @@ public class LoginActivity extends AppCompatActivity {
             btnLogin.setText(getString(R.string.loading));
             btnLogin.setEnabled(false);
 
-            btnLogin.postDelayed(() -> {
-                ProfileManager profileManager = ProfileManager.getInstance();
-                profileManager.initialize(getApplicationContext());
-                User user = profileManager.getCurrentUser();
-                // Nếu đúng tài khoản mẫu hoặc đúng tài khoản đã đăng ký
-                boolean isDefault = email.equals("nguyenvanan@gmail.com") && password.equals("12345678");
-                boolean isRegistered = user != null && email.equals(user.getEmail()) && !user.getEmail().isEmpty();
-                if ((isDefault && password.equals("12345678")) || (isRegistered && password.equals("12345678"))) {
-                    if (isDefault) {
-                        // Lưu user mẫu vào ProfileManager
-                        User defaultUser = new User();
-                        defaultUser.setName("Nguyễn Văn An");
-                        defaultUser.setEmail("nguyenvanan@gmail.com");
-                        defaultUser.setPhone("0123 456 789");
-                        defaultUser.setBirthDate("15/03/1995");
-                        defaultUser.setGender("Nam");
-                        defaultUser.setAvatarPath("");
-                        profileManager.saveUser(defaultUser);
-                    }
-                    Toast.makeText(this, getString(R.string.success_login), Toast.LENGTH_SHORT).show();
-                    Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
-                    startActivity(intent);
-                    finish();
-                } else if (isRegistered && password.equals("12345678")) {
-                    // Đăng nhập user đã đăng ký
-                    Toast.makeText(this, getString(R.string.success_login), Toast.LENGTH_SHORT).show();
-                    Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
-                    startActivity(intent);
-                    finish();
-                } else {
-                    btnLogin.setText(getString(R.string.login));
-                    btnLogin.setEnabled(true);
-                    Toast.makeText(this, getString(R.string.error_login_failed), Toast.LENGTH_SHORT).show();
-                }
-            }, 1000);
+            // Check for admin login
+            if (email.equals(ADMIN_EMAIL) && password.equals(ADMIN_PASSWORD)) {
+                Toast.makeText(this, "Admin login successful!", Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(LoginActivity.this, AdminDashboardActivity.class);
+                startActivity(intent);
+                finish();
+                return;
+            }
+
+            mAuth.signInWithEmailAndPassword(email, password)
+                    .addOnCompleteListener(this, task -> {
+                        if (task.isSuccessful()) {
+                            FirebaseUser firebaseUser = mAuth.getCurrentUser();
+                            // Load user data from ProfileManager
+                            ProfileManager profileManager = ProfileManager.getInstance();
+                            profileManager.initialize(getApplicationContext());
+                            User user = profileManager.getCurrentUser();
+
+                            // If user doesn't exist in ProfileManager, create default user
+                            if (user == null || user.getEmail().isEmpty()) {
+                                user = new User();
+                                user.setName("User");
+                                user.setEmail(email);
+                                user.setPhone("");
+                                user.setBirthDate("01/01/2000");
+                                user.setGender("Other");
+                                user.setAvatarPath("https://ui-avatars.com/api/?name=User");
+                                profileManager.saveUser(user);
+                            }
+
+                            Toast.makeText(this, getString(R.string.success_login), Toast.LENGTH_SHORT).show();
+                            Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
+                            startActivity(intent);
+                            finish();
+                        } else {
+                            btnLogin.setText(getString(R.string.login));
+                            btnLogin.setEnabled(true);
+                            Exception e = task.getException();
+                            String errorMsg = getString(R.string.error_login_failed);
+                            if (e != null) {
+                                errorMsg += "\n" + e.getMessage();
+                                Log.e(TAG, "Firebase login failed", e);
+                            }
+                            Toast.makeText(this, errorMsg, Toast.LENGTH_LONG).show();
+                        }
+                    });
         }
     }
 }
-

@@ -19,7 +19,6 @@
         android:elevation="4dp">
 
 
-
         <!-- Profile Title -->
         <TextView
             android:id="@+id/tvProfileTitle"
@@ -33,7 +32,6 @@
             android:textSize="20sp"
             android:textStyle="bold"
             android:fontFamily="sans-serif-medium" />
-
 
 
     </LinearLayout>
@@ -292,102 +290,6 @@
             <!-- Address Information Card -->
 
 
-            <!-- Stats Section -->
-            <androidx.cardview.widget.CardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                app:cardCornerRadius="12dp"
-                app:cardElevation="4dp"
-                android:background="@color/background_secondary">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:padding="20dp">
-
-                    <!-- Orders -->
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical"
-                        android:gravity="center">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="12"
-                            android:textColor="@color/primary_color"
-                            android:textSize="24sp"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="4dp"
-                            android:text="Orders"
-                            android:textColor="@color/text_hint"
-                            android:textSize="14sp" />
-
-                    </LinearLayout>
-
-                    <!-- Wishlist -->
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical"
-                        android:gravity="center">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="8"
-                            android:textColor="@color/primary_color"
-                            android:textSize="24sp"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="4dp"
-                            android:text="Wishlist"
-                            android:textColor="@color/text_hint"
-                            android:textSize="14sp" />
-
-                    </LinearLayout>
-
-                    <!-- Reviews -->
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical"
-                        android:gravity="center">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="5"
-                            android:textColor="@color/primary_color"
-                            android:textSize="24sp"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="4dp"
-                            android:text="Reviews"
-                            android:textColor="@color/text_hint"
-                            android:textSize="14sp" />
-
-                    </LinearLayout>
-
-                </LinearLayout>
-
-            </androidx.cardview.widget.CardView>
 
             <!-- Menu Options -->
             <androidx.cardview.widget.CardView
@@ -499,15 +401,12 @@
                     android:orientation="vertical">
 
 
-
                     <!-- Divider -->
                     <View
                         android:layout_width="match_parent"
                         android:layout_height="1dp"
                         android:background="@color/background_primary"
                         android:layout_marginHorizontal="16dp" />
-
-
 
 
                     <!-- Divider -->

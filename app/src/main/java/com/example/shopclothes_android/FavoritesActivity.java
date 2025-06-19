@@ -91,7 +91,8 @@ public class FavoritesActivity extends AppCompatActivity implements ProductAdapt
             } else if (itemId == R.id.nav_favorite) {
                 return true;
             } else if (itemId == R.id.nav_profile) {
-                // TODO: Implement profile activity
+                startActivity(new Intent(FavoritesActivity.this, ProfileActivity.class));
+                finish();
                 return true;
             }
             return false;

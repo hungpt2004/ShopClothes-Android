@@ -91,7 +91,8 @@ public class CartActivity extends AppCompatActivity implements CartAdapter.CartI
                 finish();
                 return true;
             } else if (itemId == R.id.nav_profile) {
-                // TODO: Implement profile activity
+                startActivity(new Intent(CartActivity.this, ProfileActivity.class));
+                finish();
                 return true;
             }
             return false;

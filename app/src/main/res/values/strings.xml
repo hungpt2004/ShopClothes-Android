@@ -31,7 +31,8 @@
 
     <!-- Forgot Password Screen -->
     <string name="forgot_password_title">Forgot Password?</string>
-    <string name="forgot_password_subtitle">Don\'t worry! Enter your email address and we\'ll send you a link to reset your password.</string>
+    <string name="forgot_password_subtitle">Don\'t worry! Enter your email address and we\'ll send
+        you a link to reset your password.</string>
     <string name="forgot_password_illustration">Forgot Password Illustration</string>
     <string name="send_reset_link">Send Reset Link</string>
     <string name="reset_link_sent">Reset link has been sent to your email!</string>
@@ -65,6 +66,8 @@
     <string name="error_network">Network error. Please check your connection</string>
     <string name="error_login_failed">Login failed. Please try again</string>
     <string name="error_registration_failed">Registration failed. Please try again</string>
+    <string name="error_email_exists">This email is already registered. Please use another email or
+        login.</string>
 
     <!-- Success Messages -->
     <string name="success_login">Login successful!</string>

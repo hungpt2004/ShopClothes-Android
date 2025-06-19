@@ -3,6 +3,7 @@ package com.example.shopclothes_android;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.LinearLayout;
@@ -13,6 +14,9 @@ import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 public class RegisterActivity extends AppCompatActivity {
 
@@ -23,12 +27,17 @@ public class RegisterActivity extends AppCompatActivity {
     private MaterialButton btnCreateAccount, btnGoogleSignup;
     private LinearLayout llSignin;
     private TextView tvSignin, tvTermsService, tvPrivacyPolicy;
+    private FirebaseAuth mAuth;
+    private FirebaseFirestore db;
+    private static final String TAG = "RegisterActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
 
+        mAuth = FirebaseAuth.getInstance();
+        db = FirebaseFirestore.getInstance();
         initViews();
         setupToolbar();
         setupClickListeners();
@@ -66,17 +75,17 @@ public class RegisterActivity extends AppCompatActivity {
 
     private void setupClickListeners() {
         btnCreateAccount.setOnClickListener(v -> performRegistration());
-        
+
         btnGoogleSignup.setOnClickListener(v -> {
             Toast.makeText(this, "Google Sign-up coming soon!", Toast.LENGTH_SHORT).show();
         });
-        
+
         llSignin.setOnClickListener(v -> finish());
-        
+
         tvTermsService.setOnClickListener(v -> {
             Toast.makeText(this, "Terms of Service", Toast.LENGTH_SHORT).show();
         });
-        
+
         tvPrivacyPolicy.setOnClickListener(v -> {
             Toast.makeText(this, "Privacy Policy", Toast.LENGTH_SHORT).show();
         });
@@ -98,25 +107,85 @@ public class RegisterActivity extends AppCompatActivity {
             btnCreateAccount.setText(getString(R.string.loading));
             btnCreateAccount.setEnabled(false);
 
-            btnCreateAccount.postDelayed(() -> {
-                // Lưu user mockdata vào ProfileManager
-                ProfileManager profileManager = ProfileManager.getInstance();
-                profileManager.initialize(getApplicationContext());
-                User user = new User();
-                user.setName(fullName);
-                user.setEmail(email);
-                user.setPhone(phone);
-                user.setBirthDate("01/01/2000");
-                user.setGender("Nam");
-                profileManager.saveUser(user);
+            mAuth.createUserWithEmailAndPassword(email, password)
+                    .addOnCompleteListener(this, task -> {
+                        if (task.isSuccessful()) {
+                            FirebaseUser firebaseUser = mAuth.getCurrentUser();
+                            // Set default values
+                            String defaultAvatarUrl = "https://ui-avatars.com/api/?name=" + fullName.replace(" ", "+");
+                            String defaultGender = "Other";
+                            String defaultBirthDate = "01/01/2000";
 
-                Toast.makeText(this, getString(R.string.success_registration), Toast.LENGTH_SHORT).show();
-                // Quay về LoginActivity để đăng nhập tài khoản vừa đăng ký
-                Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-                startActivity(intent);
-                finish();
-            }, 2000);
+                            // Create user data map for Firestore
+                            java.util.Map<String, Object> userData = new java.util.HashMap<>();
+                            userData.put("name", fullName);
+                            userData.put("email", email);
+                            userData.put("phone", phone);
+                            userData.put("birthDate", defaultBirthDate);
+                            userData.put("gender", defaultGender);
+                            userData.put("avatarUrl", defaultAvatarUrl);
+                            userData.put("createdAt", new java.util.Date());
+
+                            // Save to Firestore
+                            db.collection("users").document(firebaseUser.getUid())
+                                    .set(userData)
+                                    .addOnSuccessListener(aVoid -> {
+                                        Log.d(TAG, "User data saved to Firestore");
+                                        // Save user info locally
+                                        ProfileManager profileManager = ProfileManager.getInstance();
+                                        profileManager.initialize(getApplicationContext());
+                                        User user = new User();
+                                        user.setName(fullName);
+                                        user.setEmail(email);
+                                        user.setPhone(phone);
+                                        user.setBirthDate(defaultBirthDate);
+                                        user.setGender(defaultGender);
+                                        user.setAvatarPath(defaultAvatarUrl);
+                                        profileManager.saveUser(user);
+                                        Toast.makeText(this, getString(R.string.success_registration),
+                                                Toast.LENGTH_SHORT).show();
+                                        Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
+                                        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                                        startActivity(intent);
+                                        finish();
+                                    })
+                                    .addOnFailureListener(e -> {
+                                        Log.e(TAG, "Error saving user data to Firestore", e);
+                                        Toast.makeText(this, "Account created but failed to save profile data",
+                                                Toast.LENGTH_LONG).show();
+                                        // Still proceed with local save
+                                        ProfileManager profileManager = ProfileManager.getInstance();
+                                        profileManager.initialize(getApplicationContext());
+                                        User user = new User();
+                                        user.setName(fullName);
+                                        user.setEmail(email);
+                                        user.setPhone(phone);
+                                        user.setBirthDate(defaultBirthDate);
+                                        user.setGender(defaultGender);
+                                        user.setAvatarPath(defaultAvatarUrl);
+                                        profileManager.saveUser(user);
+                                        Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
+                                        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                                        startActivity(intent);
+                                        finish();
+                                    });
+                        } else {
+                            btnCreateAccount.setText(getString(R.string.create_account_button));
+                            btnCreateAccount.setEnabled(true);
+                            Exception e = task.getException();
+                            String errorMsg = getString(R.string.error_registration_failed);
+                            if (e != null) {
+                                if (e instanceof com.google.firebase.auth.FirebaseAuthUserCollisionException) {
+                                    errorMsg = getString(R.string.error_email_exists);
+                                    tilEmail.setError(errorMsg);
+                                } else {
+                                    errorMsg += "\n" + e.getMessage();
+                                }
+                                Log.e(TAG, "Firebase registration failed", e);
+                            }
+                            Toast.makeText(this, errorMsg, Toast.LENGTH_LONG).show();
+                        }
+                    });
         }
     }
 
@@ -128,7 +197,8 @@ public class RegisterActivity extends AppCompatActivity {
         tilConfirmPassword.setError(null);
     }
 
-    private boolean validateInputs(String fullName, String email, String phone, String password, String confirmPassword) {
+    private boolean validateInputs(String fullName, String email, String phone, String password,
+            String confirmPassword) {
         boolean isValid = true;
 
         // Validate full name

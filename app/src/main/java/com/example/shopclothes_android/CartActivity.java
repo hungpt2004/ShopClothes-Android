@@ -157,6 +157,9 @@ public class CartActivity extends AppCompatActivity implements CartAdapter.CartI
                 .setTitle("Xác nhận thanh toán")
                 .setMessage("Bạn có chắc chắn muốn thanh toán đơn hàng với tổng tiền " + totalAmount + "?")
                 .setPositiveButton("Xác nhận", (dialog, which) -> {
+                    // Save purchase to internal storage
+                    savePurchase();
+
                     // Clear cart after successful payment
                     cartManager.clearCart();
 
@@ -168,5 +171,24 @@ public class CartActivity extends AppCompatActivity implements CartAdapter.CartI
                 })
                 .setNegativeButton("Hủy", null)
                 .show();
+    }
+
+    private void savePurchase() {
+        List<Product> cartItems = cartManager.getCartItems();
+        if (!cartItems.isEmpty()) {
+            PurchaseManager purchaseManager = PurchaseManager.getInstance();
+            purchaseManager.initialize(this);
+
+            String userEmail = com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser() != null
+                    ? com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser().getEmail()
+                    : "guest@example.com";
+
+            purchaseManager.savePurchase(
+                    cartItems,
+                    cartManager.getSubtotal(),
+                    cartManager.getShippingFee(),
+                    cartManager.getTotal(),
+                    userEmail);
+        }
     }
 }

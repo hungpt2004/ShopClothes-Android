@@ -6,6 +6,18 @@
     android:layout_height="match_parent"
     android:background="@color/background">
 
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/toolbar"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:background="?attr/colorPrimary"
+        android:elevation="4dp"
+        android:theme="@style/ThemeOverlay.MaterialComponents.Dark.ActionBar"
+        app:popupTheme="@style/ThemeOverlay.MaterialComponents.Light"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
     <androidx.cardview.widget.CardView
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -42,19 +54,6 @@
                 android:textColor="@color/primary_color"
                 android:layout_marginTop="12dp"
                 android:layout_gravity="center_horizontal" />
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btn_change_password"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Change Password"
-                android:textAllCaps="false"
-                android:textColor="@color/primary_color"
-                app:backgroundTint="@color/white"
-                app:cornerRadius="12dp"
-                app:strokeColor="@color/primary_color"
-                app:strokeWidth="2dp"
-                android:layout_marginTop="32dp" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_logout"

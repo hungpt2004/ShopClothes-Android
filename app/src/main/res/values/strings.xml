@@ -81,4 +81,7 @@
     <string name="cd_logo">Application logo</string>
     <string name="cd_google_icon">Google icon</string>
     <string name="cd_facebook_icon">Facebook icon</string>
+
+    <string name="default_web_client_id">
+        486096008636-o7j5ca26rovqn6i0d9arb0pnab1ulbo7.apps.googleusercontent.com</string>
 </resources>

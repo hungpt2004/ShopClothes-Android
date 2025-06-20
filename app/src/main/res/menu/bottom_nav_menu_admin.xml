@@ -5,6 +5,10 @@
         android:icon="@drawable/ic_person"
         android:title="User Dashboard" />
     <item
+        android:id="@+id/nav_product_dashboard"
+        android:icon="@drawable/ic_add"
+        android:title="Product Dashboard" />
+    <item
         android:id="@+id/nav_settings"
         android:icon="@drawable/ic_settings"
         android:title="Settings" />

@@ -19,7 +19,6 @@ public class SettingsActivity extends AppCompatActivity {
         MaterialToolbar toolbar = findViewById(R.id.toolbar);
         toolbar.setNavigationOnClickListener(v -> finish());
         MaterialButton btnLogout = findViewById(R.id.btn_logout);
-        MaterialButton btnChangePassword = findViewById(R.id.btn_change_password);
         btnLogout.setOnClickListener(v -> {
             FirebaseAuth.getInstance().signOut();
             Intent intent = new Intent(this, LoginActivity.class);
@@ -27,14 +26,16 @@ public class SettingsActivity extends AppCompatActivity {
             startActivity(intent);
             finish();
         });
-        btnChangePassword.setOnClickListener(v -> {
-            startActivity(new Intent(this, ChangePasswordActivity.class));
-        });
         bottomNav = findViewById(R.id.bottom_navigation);
         bottomNav.setSelectedItemId(R.id.nav_settings);
         bottomNav.setOnItemSelectedListener(item -> {
             if (item.getItemId() == R.id.nav_admin) {
                 startActivity(new Intent(this, AdminDashboardActivity.class));
+                finish();
+                return true;
+            }
+            if (item.getItemId() == R.id.nav_product_dashboard) {
+                startActivity(new Intent(this, ProductDashboardActivity.class));
                 finish();
                 return true;
             }

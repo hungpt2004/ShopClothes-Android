@@ -56,6 +56,10 @@ public class AdminDashboardActivity extends AppCompatActivity implements UserAda
                 startActivity(new Intent(this, SettingsActivity.class));
                 return true;
             }
+            if (item.getItemId() == R.id.nav_product_dashboard) {
+                startActivity(new Intent(this, ProductDashboardActivity.class));
+                return true;
+            }
             return false;
         });
         etSearch = findViewById(R.id.et_search);

@@ -99,7 +99,10 @@ public class ProfileActivity extends AppCompatActivity {
 					v -> Toast.makeText(this, "Add Address feature coming soon!", Toast.LENGTH_SHORT).show());
 		if (layoutMyOrders != null)
 			layoutMyOrders.setOnClickListener(
-					v -> Toast.makeText(this, "My Orders feature coming soon!", Toast.LENGTH_SHORT).show());
+					v -> {
+						Intent intent = new Intent(ProfileActivity.this, PurchaseHistoryActivity.class);
+						startActivity(intent);
+					});
 		if (layoutWishlist != null)
 			layoutWishlist.setOnClickListener(v -> {
 				if (FavoritesActivity.class != null) {

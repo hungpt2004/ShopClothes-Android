@@ -1,6 +1,8 @@
 package com.example.shopclothes_android;
 
-public class Product {
+import java.io.Serializable;
+
+public class Product implements Serializable {
     private String name;
     private double price;
     private int imageResId; // drawable resource id

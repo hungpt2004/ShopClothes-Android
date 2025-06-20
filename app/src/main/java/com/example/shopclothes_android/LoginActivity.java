@@ -15,12 +15,24 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import android.util.Log;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.common.api.ApiException;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthCredential;
+import com.google.firebase.auth.GoogleAuthProvider;
+import java.util.HashMap;
+import java.util.Map;
+import com.google.android.gms.common.SignInButton;
 
 public class LoginActivity extends AppCompatActivity {
 
     private TextInputLayout tilEmail, tilPassword;
     private TextInputEditText etEmail, etPassword;
-    private MaterialButton btnLogin, btnGoogleSignin;
+    private MaterialButton btnLogin;
+    private SignInButton btnGoogleSignin;
     private TextView tvForgotPassword, tvSignup;
     private LinearLayout llSignup;
     private FirebaseAuth mAuth;
@@ -28,6 +40,8 @@ public class LoginActivity extends AppCompatActivity {
     private static final String TAG = "LoginActivity";
     private static final String ADMIN_EMAIL = "admin@gmail.com";
     private static final String ADMIN_PASSWORD = "admin123";
+    private static final int RC_SIGN_IN = 9001;
+    private GoogleSignInClient mGoogleSignInClient;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,6 +52,13 @@ public class LoginActivity extends AppCompatActivity {
         db = FirebaseFirestore.getInstance();
         initViews();
         setupClickListeners();
+
+        // Google Sign-In options
+        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestIdToken(getString(R.string.default_web_client_id))
+                .requestEmail()
+                .build();
+        mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
     }
 
     private void initViews() {
@@ -55,9 +76,7 @@ public class LoginActivity extends AppCompatActivity {
     private void setupClickListeners() {
         btnLogin.setOnClickListener(v -> performLogin());
 
-        btnGoogleSignin.setOnClickListener(v -> {
-            Toast.makeText(this, "Google Sign-in coming soon!", Toast.LENGTH_SHORT).show();
-        });
+        btnGoogleSignin.setOnClickListener(v -> signInWithGoogle());
 
         tvForgotPassword.setOnClickListener(v -> {
             Intent intent = new Intent(LoginActivity.this, ForgotPasswordActivity.class);
@@ -170,5 +189,102 @@ public class LoginActivity extends AppCompatActivity {
                         }
                     });
         }
+    }
+
+    private void signInWithGoogle() {
+        Intent signInIntent = mGoogleSignInClient.getSignInIntent();
+        startActivityForResult(signInIntent, RC_SIGN_IN);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == RC_SIGN_IN) {
+            Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
+            try {
+                GoogleSignInAccount account = task.getResult(ApiException.class);
+                if (account != null) {
+                    firebaseAuthWithGoogle(account.getIdToken());
+                } else {
+                    Toast.makeText(this, "Google sign in failed", Toast.LENGTH_SHORT).show();
+                }
+            } catch (ApiException e) {
+                Toast.makeText(this, "Google sign in failed", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    private void firebaseAuthWithGoogle(String idToken) {
+        AuthCredential credential = GoogleAuthProvider.getCredential(idToken, null);
+        mAuth.signInWithCredential(credential)
+                .addOnCompleteListener(this, task -> {
+                    if (task.isSuccessful()) {
+                        FirebaseUser user = mAuth.getCurrentUser();
+                        if (user != null) {
+                            if (task.getResult().getAdditionalUserInfo().isNewUser()) {
+                                createNewUserInFirestore(user);
+                            } else {
+                                fetchAndSaveUser(user.getUid());
+                            }
+                        }
+                    } else {
+                        Toast.makeText(this, "Authentication Failed.", Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+
+    private void createNewUserInFirestore(FirebaseUser firebaseUser) {
+        Map<String, Object> user = new HashMap<>();
+        user.put("uid", firebaseUser.getUid());
+        user.put("email", firebaseUser.getEmail());
+        user.put("name",
+                firebaseUser.getDisplayName() != null ? firebaseUser.getDisplayName() : "User");
+        user.put("avatarUrl",
+                firebaseUser.getPhotoUrl() != null ? firebaseUser.getPhotoUrl().toString() : "");
+        user.put("gender", "Not specified");
+        user.put("birthDate", "Not specified");
+        user.put("isBanned", false);
+        db.collection("users").document(firebaseUser.getUid()).set(user)
+                .addOnSuccessListener(aVoid -> fetchAndSaveUser(firebaseUser.getUid()))
+                .addOnFailureListener(e -> {
+                    Toast.makeText(this, "Failed to save user info.", Toast.LENGTH_SHORT).show();
+                });
+    }
+
+    // Fetch user document from Firestore and save to ProfileManager
+    private void fetchAndSaveUser(String uid) {
+        db.collection("users").document(uid).get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists()) {
+                        User user = new User();
+                        user.setName(documentSnapshot.getString("name"));
+                        user.setEmail(documentSnapshot.getString("email"));
+                        user.setPhone(
+                                documentSnapshot.getString("phone") != null ? documentSnapshot.getString("phone") : "");
+                        user.setBirthDate(documentSnapshot.getString("birthDate") != null
+                                ? documentSnapshot.getString("birthDate")
+                                : "");
+                        user.setGender(
+                                documentSnapshot.getString("gender") != null ? documentSnapshot.getString("gender")
+                                        : "");
+                        user.setAvatarPath(documentSnapshot.getString("avatarUrl") != null
+                                ? documentSnapshot.getString("avatarUrl")
+                                : "");
+                        ProfileManager profileManager = ProfileManager.getInstance();
+                        profileManager.initialize(getApplicationContext());
+                        profileManager.saveUser(user);
+                    }
+                    goToHome();
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(this, "Failed to load user profile.", Toast.LENGTH_SHORT).show();
+                    goToHome();
+                });
+    }
+
+    private void goToHome() {
+        Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
+        startActivity(intent);
+        finish();
     }
 }

@@ -25,13 +25,9 @@ public class HomeActivity extends AppCompatActivity implements ProductAdapter.Pr
         RecyclerView rvProducts = findViewById(R.id.rvProducts);
         rvProducts.setLayoutManager(new LinearLayoutManager(this));
 
-        // Create sample products with real prices
-        List<Product> products = new ArrayList<>();
-        products.add(new Product("T-shirt", 29.99, R.drawable.tshirt));
-        products.add(new Product("Jeans", 59.99, R.drawable.jeans));
-        products.add(new Product("Jacket", 89.99, R.drawable.jacket));
-        products.add(new Product("Dress", 79.99, R.drawable.dress));
-        products.add(new Product("Shorts", 39.99, R.drawable.shorts));
+        ProductManager productManager = ProductManager.getInstance();
+        productManager.initialize(this);
+        List<Product> products = productManager.getProducts();
 
         adapter = new ProductAdapter(products, this);
         rvProducts.setAdapter(adapter);
@@ -79,7 +75,8 @@ public class HomeActivity extends AppCompatActivity implements ProductAdapter.Pr
         try {
             Intent intent = new Intent(this, ProductDetailActivity.class);
             intent.putExtra("product_title", product.getName());
-            intent.putExtra("product_description", "Sản phẩm chất lượng cao với thiết kế hiện đại, phù hợp cho mọi nhu cầu sử dụng. Cam kết mang đến trải nghiệm tuyệt vời cho khách hàng.");
+            intent.putExtra("product_description",
+                    "Sản phẩm chất lượng cao với thiết kế hiện đại, phù hợp cho mọi nhu cầu sử dụng. Cam kết mang đến trải nghiệm tuyệt vời cho khách hàng.");
             intent.putExtra("rating", 4.95f); // hoặc lấy từ product nếu có
             intent.putExtra("review_count", 22); // hoặc lấy từ product nếu có
             intent.putExtra("price", String.format("$%.2f", product.getPrice()));

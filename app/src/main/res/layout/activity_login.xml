@@ -169,21 +169,11 @@
         </LinearLayout>
 
         <!-- Google Sign In Button -->
-        <com.google.android.material.button.MaterialButton
+        <com.google.android.gms.common.SignInButton
             android:id="@+id/btn_google_signin"
-            style="@style/Widget.Material3.Button.OutlinedButton"
             android:layout_width="0dp"
             android:layout_height="56dp"
             android:layout_marginTop="24dp"
-            android:text="@string/continue_with_google"
-            android:textColor="@color/text_primary"
-            android:textSize="16sp"
-            app:cornerRadius="12dp"
-            app:iconGravity="textStart"
-            app:iconPadding="12dp"
-            app:strokeColor="@color/stroke_color"
-            app:strokeWidth="1dp"
-            app:icon="@drawable/ic_google"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/ll_divider" />

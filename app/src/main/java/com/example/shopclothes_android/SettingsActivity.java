@@ -39,6 +39,11 @@ public class SettingsActivity extends AppCompatActivity {
                 finish();
                 return true;
             }
+            if (item.getItemId() == R.id.nav_chat) {
+                startActivity(new Intent(this, AdminChatListActivity.class));
+                finish();
+                return true;
+            }
             if (item.getItemId() == R.id.nav_settings)
                 return true;
             return false;

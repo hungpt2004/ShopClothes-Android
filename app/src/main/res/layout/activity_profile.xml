@@ -290,7 +290,6 @@
             <!-- Address Information Card -->
 
 
-
             <!-- Menu Options -->
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
@@ -400,14 +399,40 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical">
 
-
-                    <!-- Divider -->
-                    <View
+                    <!-- Chat with Admin -->
+                    <LinearLayout
+                        android:id="@+id/layoutChatAdmin"
                         android:layout_width="match_parent"
-                        android:layout_height="1dp"
-                        android:background="@color/background_primary"
-                        android:layout_marginHorizontal="16dp" />
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:padding="16dp"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:background="?android:attr/selectableItemBackground">
 
+                        <ImageView
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:layout_gravity="center_vertical"
+                            android:src="@drawable/ic_send"
+                            android:layout_marginEnd="16dp" />
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:layout_gravity="center_vertical"
+                            android:text="Chat with Admin"
+                            android:textColor="@color/text_primary"
+                            android:textSize="16sp" />
+
+                        <ImageView
+                            android:layout_width="16dp"
+                            android:layout_height="16dp"
+                            android:layout_gravity="center_vertical"
+                            android:src="@drawable/ic_arrow_forward" />
+
+                    </LinearLayout>
 
                     <!-- Divider -->
                     <View

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="200dp"
+    android:height="48dp"
+    android:viewportWidth="200"
+    android:viewportHeight="48">
+    <!-- Google Pay Acceptance Mark (simplified for demo) -->
+    <rect android:width="200" android:height="48" android:fillColor="#FFFFFF"/>
+    <path android:pathData="M20,24a20,20 0 1,0 40,0a20,20 0 1,0 -40,0" android:fillColor="#4285F4"/>
+    <path android:pathData="M60,24a20,20 0 1,0 40,0a20,20 0 1,0 -40,0" android:fillColor="#34A853"/>
+    <path android:pathData="M100,24a20,20 0 1,0 40,0a20,20 0 1,0 -40,0" android:fillColor="#FBBC05"/>
+    <path android:pathData="M140,24a20,20 0 1,0 40,0a20,20 0 1,0 -40,0" android:fillColor="#EA4335"/>
+    <!-- You should replace this with the official asset from Google for production -->
+</vector>

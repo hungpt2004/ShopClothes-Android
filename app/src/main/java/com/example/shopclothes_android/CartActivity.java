@@ -7,6 +7,16 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
+import android.widget.ImageView;
+import com.google.android.gms.wallet.Wallet;
+import com.google.android.gms.wallet.WalletConstants;
+import com.google.android.gms.wallet.PaymentsClient;
+import com.google.android.gms.wallet.PaymentData;
+import com.google.android.gms.wallet.AutoResolveHelper;
+import com.google.android.material.button.MaterialButton;
+import android.util.Log;
+import com.google.android.gms.tasks.Task;
+import org.json.JSONObject;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -15,6 +25,10 @@ import java.util.List;
 import java.util.Locale;
 
 public class CartActivity extends AppCompatActivity implements CartAdapter.CartItemListener {
+    private static final int LOAD_PAYMENT_DATA_REQUEST_CODE = 991;
+
+    private PaymentsClient paymentsClient;
+    private ImageView imgGPayMark;
 
     private RecyclerView rvCart;
     private TextView tvSubtotal, tvShipping, tvTotal;
@@ -26,6 +40,7 @@ public class CartActivity extends AppCompatActivity implements CartAdapter.CartI
     private CartAdapter cartAdapter;
     private BottomNavigationView bottomNavigationView;
     private final NumberFormat currencyFormatter = NumberFormat.getCurrencyInstance(new Locale("en", "US"));
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,6 +58,24 @@ public class CartActivity extends AppCompatActivity implements CartAdapter.CartI
         emptyCartContainer = findViewById(R.id.empty_cart_container);
         cartContentContainer = findViewById(R.id.cart_content_container);
         btnContinueShopping = findViewById(R.id.btn_continue_shopping);
+        imgGPayMark = findViewById(R.id.img_gpay_mark);
+
+        // Google Pay button
+        MaterialButton btnGooglePay = findViewById(R.id.btn_google_pay);
+        btnGooglePay.setVisibility(View.GONE); // Hide by default, show if available
+
+        btnGooglePay.setOnClickListener(v -> launchGooglePay());
+
+        // Setup Google Pay API client
+        paymentsClient = Wallet.getPaymentsClient(
+            this,
+            new Wallet.WalletOptions.Builder()
+                .setEnvironment(WalletConstants.ENVIRONMENT_TEST)
+                .build()
+        );
+
+        // Check if Google Pay is available and show/hide the mark
+        isReadyToPay();
 
         // Setup RecyclerView
         rvCart.setLayoutManager(new LinearLayoutManager(this));
@@ -97,6 +130,141 @@ public class CartActivity extends AppCompatActivity implements CartAdapter.CartI
             }
             return false;
         });
+    }
+
+    private void launchGooglePay() {
+        try {
+            JSONObject paymentDataRequestJson = getPaymentDataRequest();
+            if (paymentDataRequestJson == null) {
+                Log.e("CartActivity", "PaymentDataRequest JSON is null");
+                return;
+            }
+            com.google.android.gms.wallet.PaymentDataRequest request =
+                    com.google.android.gms.wallet.PaymentDataRequest.fromJson(paymentDataRequestJson.toString());
+            Task<PaymentData> task = paymentsClient.loadPaymentData(request);
+            AutoResolveHelper.resolveTask(task, this, LOAD_PAYMENT_DATA_REQUEST_CODE);
+        } catch (Exception e) {
+            Log.e("CartActivity", "Error launching Google Pay", e);
+        }
+    }
+
+    private JSONObject getPaymentDataRequest() {
+        try {
+            JSONObject paymentDataRequest = new JSONObject();
+            paymentDataRequest.put("apiVersion", 2);
+            paymentDataRequest.put("apiVersionMinor", 0);
+
+            // Allowed payment methods
+            JSONObject cardPaymentMethod = new JSONObject();
+            cardPaymentMethod.put("type", "CARD");
+            JSONObject parameters = new JSONObject();
+            parameters.put("allowedAuthMethods", new org.json.JSONArray().put("PAN_ONLY").put("CRYPTOGRAM_3DS"));
+            parameters.put("allowedCardNetworks", new org.json.JSONArray().put("MASTERCARD").put("VISA"));
+            parameters.put("billingAddressRequired", true);
+            JSONObject billingAddressParams = new JSONObject();
+            billingAddressParams.put("format", "FULL");
+            parameters.put("billingAddressParameters", billingAddressParams);
+            cardPaymentMethod.put("parameters", parameters);
+            JSONObject tokenizationSpec = new JSONObject();
+            tokenizationSpec.put("type", "PAYMENT_GATEWAY");
+            JSONObject tokenizationParams = new JSONObject();
+            tokenizationParams.put("gateway", "example"); // Replace with your gateway
+            tokenizationParams.put("gatewayMerchantId", "exampleGatewayMerchantId"); // Replace with your merchant ID
+            tokenizationSpec.put("parameters", tokenizationParams);
+            cardPaymentMethod.put("tokenizationSpecification", tokenizationSpec);
+
+            paymentDataRequest.put("allowedPaymentMethods", new org.json.JSONArray().put(cardPaymentMethod));
+
+            // Transaction info
+            JSONObject transactionInfo = new JSONObject();
+            transactionInfo.put("totalPrice", String.format(Locale.US, "%.2f", cartManager.getTotal()));
+            transactionInfo.put("totalPriceStatus", "FINAL");
+            transactionInfo.put("currencyCode", "USD");
+            paymentDataRequest.put("transactionInfo", transactionInfo);
+
+            // Merchant info
+            JSONObject merchantInfo = new JSONObject();
+            merchantInfo.put("merchantName", "Example Merchant"); // Replace with your merchant name
+            paymentDataRequest.put("merchantInfo", merchantInfo);
+
+            return paymentDataRequest;
+        } catch (Exception e) {
+            Log.e("CartActivity", "Error building PaymentDataRequest", e);
+            return null;
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == LOAD_PAYMENT_DATA_REQUEST_CODE) {
+            switch (resultCode) {
+                case RESULT_OK:
+                    if (data != null) {
+                        PaymentData paymentData = PaymentData.getFromIntent(data);
+                        handlePaymentSuccess(paymentData);
+                    }
+                    break;
+                case RESULT_CANCELED:
+                    // User canceled
+                    break;
+                case AutoResolveHelper.RESULT_ERROR:
+                    if (data != null) {
+                        com.google.android.gms.common.api.Status status = AutoResolveHelper.getStatusFromIntent(data);
+                        Log.e("CartActivity", "Google Pay failed: " + (status != null ? status.getStatusMessage() : ""));
+                    }
+                    break;
+            }
+        }
+    }
+
+    private void handlePaymentSuccess(PaymentData paymentData) {
+        if (paymentData == null) return;
+        String paymentInfo = paymentData.toJson();
+        // You should send paymentInfo to your server for verification and fulfillment
+        // For demo, just show success and clear cart
+        showPaymentSuccess();
+    }
+
+    private void showPaymentSuccess() {
+        // Clear cart after successful payment
+        cartManager.clearCart();
+        Intent intent = new Intent(CartActivity.this, PaymentSuccessActivity.class);
+        intent.putExtra("total_amount", currencyFormatter.format(0));
+        startActivity(intent);
+        finish();
+    }
+
+    // Check if Google Pay is available on this device
+    private void isReadyToPay() {
+        try {
+            JSONObject isReadyToPayJson = new JSONObject()
+                .put("allowedPaymentMethods", new org.json.JSONArray()
+                    .put(new JSONObject()
+                        .put("type", "CARD")
+                        .put("parameters", new JSONObject()
+                            .put("allowedAuthMethods", new org.json.JSONArray().put("PAN_ONLY").put("CRYPTOGRAM_3DS"))
+                            .put("allowedCardNetworks", new org.json.JSONArray().put("MASTERCARD").put("VISA"))
+                        )
+                    )
+                );
+            Task<Boolean> task = paymentsClient.isReadyToPay(new com.google.android.gms.wallet.IsReadyToPayRequest.Builder().fromJson(isReadyToPayJson.toString()).build());
+            task.addOnCompleteListener(this, completedTask -> {
+                boolean result = false;
+                try {
+                    result = completedTask.getResult(Exception.class);
+                } catch (Exception e) {
+                    result = false;
+                }
+                imgGPayMark.setVisibility(result ? View.VISIBLE : View.GONE);
+                MaterialButton btnGooglePay = findViewById(R.id.btn_google_pay);
+                btnGooglePay.setVisibility(result ? View.VISIBLE : View.GONE);
+            });
+        } catch (Exception e) {
+            imgGPayMark.setVisibility(View.GONE);
+            MaterialButton btnGooglePay = findViewById(R.id.btn_google_pay);
+            btnGooglePay.setVisibility(View.GONE);
+        }
     }
 
     @Override

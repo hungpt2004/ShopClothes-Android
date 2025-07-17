@@ -187,6 +187,27 @@
                 android:background="@drawable/button_primary_bg"
                 android:text="Checkout"
                 android:textColor="@android:color/white" />
+            <!-- Google Pay Button -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_google_pay"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginTop="12dp"
+                android:backgroundTint="@color/white"
+                android:icon="@drawable/google_pay_mark_800"
+                android:iconGravity="textStart"
+                android:iconPadding="8dp"
+                android:text="Pay with Google Pay"
+                android:textColor="@color/black"
+                android:contentDescription="Google Pay Button" />
+            <!-- Google Pay Acceptance Mark -->
+            <ImageView
+                android:id="@+id/img_gpay_mark"
+                android:layout_width="wrap_content"
+                android:layout_height="48dp"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="8dp"
+                android:src="@drawable/google_pay_mark_800" />
         </LinearLayout>
     </LinearLayout>
 

@@ -9,6 +9,10 @@
         android:icon="@drawable/ic_add"
         android:title="Product Dashboard" />
     <item
+        android:id="@+id/nav_chat"
+        android:icon="@drawable/ic_send"
+        android:title="Chat Support" />
+    <item
         android:id="@+id/nav_settings"
         android:icon="@drawable/ic_settings"
         android:title="Settings" />

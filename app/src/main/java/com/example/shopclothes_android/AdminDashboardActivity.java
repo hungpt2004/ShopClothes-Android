@@ -60,6 +60,10 @@ public class AdminDashboardActivity extends AppCompatActivity implements UserAda
                 startActivity(new Intent(this, ProductDashboardActivity.class));
                 return true;
             }
+            if (item.getItemId() == R.id.nav_chat) {
+                startActivity(new Intent(this, AdminChatListActivity.class));
+                return true;
+            }
             return false;
         });
         etSearch = findViewById(R.id.et_search);

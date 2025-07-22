@@ -22,7 +22,7 @@ public class ProfileActivity extends AppCompatActivity {
 	private TextView tvUserName, tvUserEmail, tvUserPhone, tvUserBirthDate,
 			tvUserGender, tvUserAddress, btnManageAddress;
 	private Button btnEditProfile, btnAddAddress;
-	private LinearLayout layoutMyOrders, layoutWishlist, layoutLogout;
+	private LinearLayout layoutMyOrders, layoutWishlist, layoutLogout, layoutChatAdmin;
 	private BottomNavigationView bottomNavigation;
 	private static final int EDIT_PROFILE_REQUEST = 101;
 
@@ -51,6 +51,7 @@ public class ProfileActivity extends AppCompatActivity {
 
 		layoutMyOrders = findViewById(R.id.layoutMyOrders);
 		layoutWishlist = findViewById(R.id.layoutWishlist);
+		layoutChatAdmin = findViewById(R.id.layoutChatAdmin);
 
 		layoutLogout = findViewById(R.id.layoutLogout);
 
@@ -111,6 +112,12 @@ public class ProfileActivity extends AppCompatActivity {
 				} else {
 					Toast.makeText(this, "Wishlist feature coming soon!", Toast.LENGTH_SHORT).show();
 				}
+			});
+		if (layoutChatAdmin != null)
+			layoutChatAdmin.setOnClickListener(v -> {
+				Intent intent = new Intent(ProfileActivity.this, ChatActivity.class);
+				startActivity(intent);
+				overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
 			});
 		if (layoutLogout != null)
 			layoutLogout.setOnClickListener(v -> showLogoutDialog());

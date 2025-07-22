@@ -1,10 +1,15 @@
 package com.example.shopclothes_android;
 
 import android.content.Intent;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.LinearLayout;
+import androidx.viewpager2.widget.ViewPager2;
+import com.google.android.material.tabs.TabLayout;
+import com.google.android.material.tabs.TabLayoutMediator;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
@@ -43,6 +48,12 @@ public class LoginActivity extends AppCompatActivity {
     private static final int RC_SIGN_IN = 9001;
     private GoogleSignInClient mGoogleSignInClient;
 
+    // Carousel
+    private ViewPager2 vpCarousel;
+    private Handler carouselHandler;
+    private Runnable carouselRunnable;
+    private int carouselInterval = 3000; // 3 seconds
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -59,6 +70,40 @@ public class LoginActivity extends AppCompatActivity {
                 .requestEmail()
                 .build();
         mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
+
+        // --- Carousel setup ---
+        vpCarousel = findViewById(R.id.vp_carousel);
+
+        // Sample image URLs (bạn thay bằng link hoặc tên file ảnh của bạn)
+        String[] imageUrls = {
+                "https://images.unsplash.com/photo-1512436991641-6745cdb1723f",
+                "https://images.unsplash.com/photo-1506744038136-46273834b3fb",
+                "https://images.unsplash.com/photo-1465101046530-73398c7f28ca"
+        };
+
+        CarouselAdapter carouselAdapter = new CarouselAdapter(this, java.util.Arrays.asList(imageUrls));
+        vpCarousel.setAdapter(carouselAdapter);
+
+        // TabLayout indicator
+
+        // Auto-slide logic
+        carouselHandler = new Handler(Looper.getMainLooper());
+        carouselRunnable = new Runnable() {
+            @Override
+            public void run() {
+                int nextItem = (vpCarousel.getCurrentItem() + 1) % imageUrls.length;
+                vpCarousel.setCurrentItem(nextItem, true);
+                carouselHandler.postDelayed(this, carouselInterval);
+            }
+        };
+        vpCarousel.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
+            @Override
+            public void onPageSelected(int position) {
+                carouselHandler.removeCallbacks(carouselRunnable);
+                carouselHandler.postDelayed(carouselRunnable, carouselInterval);
+            }
+        });
+        carouselHandler.postDelayed(carouselRunnable, carouselInterval);
     }
 
     private void initViews() {
@@ -71,6 +116,14 @@ public class LoginActivity extends AppCompatActivity {
         tvForgotPassword = findViewById(R.id.tv_forgot_password);
         tvSignup = findViewById(R.id.tv_signup);
         llSignup = findViewById(R.id.ll_signup);
+        // vpCarousel, tabIndicator đã được khởi tạo ở onCreate
+    }
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (carouselHandler != null && carouselRunnable != null) {
+            carouselHandler.removeCallbacks(carouselRunnable);
+        }
     }
 
     private void setupClickListeners() {

@@ -3,9 +3,11 @@ package com.example.shopclothes_android;
 import java.io.Serializable;
 
 public class Product implements Serializable {
+    private int id; // for SQLite
     private String name;
     private double price;
     private int imageResId; // drawable resource id
+    private String imageUri; // for custom images
     private int quantity;
     private boolean isFavorite;
 
@@ -13,8 +15,23 @@ public class Product implements Serializable {
         this.name = name;
         this.price = price;
         this.imageResId = imageResId;
+        this.imageUri = null;
         this.quantity = 1; // Default quantity
         this.isFavorite = false;
+    }
+
+    public String getImageUri() {
+        return imageUri;
+    }
+    public void setImageUri(String imageUri) {
+        this.imageUri = imageUri;
+    }
+
+    public int getId() {
+        return id;
+    }
+    public void setId(int id) {
+        this.id = id;
     }
 
     public String getName() {

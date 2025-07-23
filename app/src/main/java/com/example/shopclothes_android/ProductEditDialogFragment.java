@@ -36,13 +36,14 @@ public class ProductEditDialogFragment extends DialogFragment {
     private Product productToEdit;
     private int editIndex = -1;
     private int imageResId = 0;
+    private String imageUriStr = null;
     private ProductEditListener listener;
 
-    public static ProductEditDialogFragment newInstance(@Nullable Product product, int editIndex) {
+    public static ProductEditDialogFragment newInstance(@Nullable Product product, int productId) {
         ProductEditDialogFragment fragment = new ProductEditDialogFragment();
         Bundle args = new Bundle();
         args.putSerializable("product", product);
-        args.putInt("edit_index", editIndex);
+        args.putInt("productId", productId);
         fragment.setArguments(args);
         return fragment;
     }
@@ -102,6 +103,7 @@ public class ProductEditDialogFragment extends DialogFragment {
         if (requestCode == PICK_IMAGE_REQUEST && resultCode == Activity.RESULT_OK && data != null
                 && data.getData() != null) {
             Uri imageUri = data.getData();
+            imageUriStr = imageUri.toString();
             try {
                 InputStream inputStream = getActivity().getContentResolver().openInputStream(imageUri);
                 Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
@@ -135,8 +137,13 @@ public class ProductEditDialogFragment extends DialogFragment {
         if (!valid)
             return;
         Product product = new Product(name, price, imageResId);
+        if (imageUriStr != null && !imageUriStr.isEmpty()) {
+            product.setImageUri(imageUriStr);
+        }
+        int productId = getArguments() != null ? getArguments().getInt("productId", -1) : -1;
+        product.setId(productId);
         if (listener != null) {
-            listener.onProductSaved(product, editIndex);
+            listener.onProductSaved(product, productId);
         }
         dismiss();
     }

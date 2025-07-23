@@ -115,15 +115,14 @@ public class ProductDashboardActivity extends AppCompatActivity
 
     @Override
     public void onEditProduct(int position, Product product) {
-        int realIndex = allProducts.indexOf(filteredProducts.get(position));
-        ProductEditDialogFragment dialog = ProductEditDialogFragment.newInstance(product, realIndex);
+        ProductEditDialogFragment dialog = ProductEditDialogFragment.newInstance(product, product.getId());
         dialog.show(getSupportFragmentManager(), "edit_product");
     }
 
     @Override
     public void onDeleteProduct(int position) {
-        int realIndex = allProducts.indexOf(filteredProducts.get(position));
-        productManager.deleteProduct(realIndex);
+        Product product = filteredProducts.get(position);
+        productManager.deleteProduct(product.getId());
         allProducts = productManager.getProducts();
         filterProducts(etSearch.getText().toString());
         Snackbar.make(rvProducts, "Product deleted", Snackbar.LENGTH_SHORT).show();

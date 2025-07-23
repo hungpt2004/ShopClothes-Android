@@ -67,7 +67,9 @@ public class ProductDashboardAdapter extends RecyclerView.Adapter<ProductDashboa
         public void bind(Product product) {
             tvProductName.setText(product.getName());
             tvProductPrice.setText(currencyFormatter.format(product.getPrice()));
-            if (product.getImageResId() != 0) {
+            if (product.getImageUri() != null && !product.getImageUri().isEmpty()) {
+                ivProductImage.setImageURI(android.net.Uri.parse(product.getImageUri()));
+            } else if (product.getImageResId() != 0) {
                 ivProductImage.setImageResource(product.getImageResId());
             } else {
                 ivProductImage.setImageResource(R.drawable.placeholder_product);

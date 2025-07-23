@@ -1,5 +1,6 @@
 package com.example.shopclothes_android;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
@@ -9,12 +10,27 @@ import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.google.android.gms.wallet.IsReadyToPayRequest;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import java.text.NumberFormat;
 import java.util.List;
 import java.util.Locale;
+import com.google.android.gms.wallet.PaymentsClient;
+import com.google.android.gms.wallet.PaymentData;
+import com.google.android.gms.wallet.PaymentDataRequest;
+import com.google.android.gms.wallet.AutoResolveHelper;
+import com.google.android.gms.wallet.WalletConstants;
+import android.util.Log;
+import android.widget.Toast;
+
+import org.json.JSONObject;
+
 
 public class CartActivity extends AppCompatActivity implements CartAdapter.CartItemListener {
+    private static final int LOAD_PAYMENT_DATA_REQUEST_CODE = 991;
+    private PaymentsClient paymentsClient;
+    private View googlePayButton;
 
     private RecyclerView rvCart;
     private TextView tvSubtotal, tvShipping, tvTotal;
@@ -31,6 +47,10 @@ public class CartActivity extends AppCompatActivity implements CartAdapter.CartI
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_cart);
+        googlePayButton = findViewById(R.id.google_pay_button);
+        paymentsClient = GooglePay.createPaymentsClient(this);
+
+        isReadyToPay();
 
         cartManager = CartManager.getInstance();
 
@@ -102,6 +122,90 @@ public class CartActivity extends AppCompatActivity implements CartAdapter.CartI
     @Override
     public void onQuantityChanged() {
         updatePrices();
+    }
+    private void isReadyToPay() {
+        JSONObject isReadyToPayJson = GooglePay.getIsReadyToPayRequest();
+        if (isReadyToPayJson == null) {
+            Log.e("GooglePay", "Failed to create isReadyToPayRequest");
+            return;
+        }
+
+        IsReadyToPayRequest request = IsReadyToPayRequest.fromJson(isReadyToPayJson.toString());
+        paymentsClient.isReadyToPay(request).addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                boolean isReady = task.getResult();
+                if (isReady) {
+                    googlePayButton.setVisibility(View.VISIBLE);
+                    googlePayButton.setOnClickListener(view -> requestPayment(this));
+                } else {
+                    Log.w("GooglePay", "Google Pay is not ready");
+                    googlePayButton.setVisibility(View.GONE);
+                }
+            } else {
+                Exception exception = task.getException();
+                Log.e("GooglePay", "isReadyToPay failed", exception);
+
+                // Log the specific error for debugging
+                if (exception != null) {
+                    Log.e("GooglePay", "Error message: " + exception.getMessage());
+                }
+
+                googlePayButton.setVisibility(View.GONE);
+            }
+        });
+    }
+    private void requestPayment(Activity activity) {
+        double total = cartManager.getTotal(); // USD
+        long totalCents = Math.round(total * 100);
+
+        JSONObject paymentDataRequestJson = GooglePay.getPaymentDataRequest(totalCents);
+        if (paymentDataRequestJson == null) return;
+
+        PaymentDataRequest request = PaymentDataRequest.fromJson(paymentDataRequestJson.toString());
+        AutoResolveHelper.resolveTask(
+                paymentsClient.loadPaymentData(request),
+                activity, LOAD_PAYMENT_DATA_REQUEST_CODE);
+    }
+
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == LOAD_PAYMENT_DATA_REQUEST_CODE) {
+            switch (resultCode) {
+                case RESULT_OK:
+                    if (data != null) {
+                        PaymentData paymentData = PaymentData.getFromIntent(data);
+                        handlePaymentSuccess(paymentData);
+                    } else {
+                        Log.e("GooglePay", "Payment data is null");
+                        Toast.makeText(this, "Payment failed - no data received", Toast.LENGTH_SHORT).show();
+                    }
+                    break;
+                case RESULT_CANCELED:
+                    Log.d("GooglePay", "Payment cancelled by user");
+                    Toast.makeText(this, "Payment cancelled", Toast.LENGTH_SHORT).show();
+                    break;
+                default:
+                    Log.e("GooglePay", "Payment failed with result code: " + resultCode);
+                    if (data != null && data.hasExtra("com.google.android.gms.wallet.EXTRA_ERROR_CODE")) {
+                        int errorCode = data.getIntExtra("com.google.android.gms.wallet.EXTRA_ERROR_CODE", -1);
+                        Log.e("GooglePay", "Error code: " + errorCode);
+                    }
+                    Toast.makeText(this, "Google Pay failed", Toast.LENGTH_SHORT).show();
+                    break;
+            }
+        }
+    }
+
+    private void handlePaymentSuccess(PaymentData paymentData) {
+        // This is a sample; in real app you use Braintree SDK to confirm token and process payment on server
+        String paymentInfo = paymentData.toJson();
+        Log.d("GooglePay", "Payment successful: " + paymentInfo);
+
+        // Fake success flow
+        showConfirmationDialog();
     }
 
     @Override

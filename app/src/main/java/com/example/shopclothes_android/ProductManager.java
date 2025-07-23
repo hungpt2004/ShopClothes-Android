@@ -29,16 +29,13 @@ public class ProductManager {
 
     public void initialize(Context context) {
         this.context = context;
-        loadProducts();
-        if (products.isEmpty()) {
-            // Add default products
-            products.add(new Product("T-shirt", 29.99, R.drawable.tshirt));
-            products.add(new Product("Jeans", 59.99, R.drawable.jeans));
-            products.add(new Product("Jacket", 89.99, R.drawable.jacket));
-            products.add(new Product("Dress", 79.99, R.drawable.dress));
-            products.add(new Product("Shorts", 39.99, R.drawable.shorts));
-            saveProductsToStorage();
-        }
+        // Luôn khởi tạo danh sách sản phẩm cứng giống SearchActivity
+        products.clear();
+        products.add(new Product("T-shirt", 29.99, R.drawable.tshirt));
+        products.add(new Product("Jeans", 59.99, R.drawable.jeans));
+        products.add(new Product("Jacket", 89.99, R.drawable.jacket));
+        products.add(new Product("Dress", 79.99, R.drawable.dress));
+        products.add(new Product("Shorts", 39.99, R.drawable.shorts));
     }
 
     public List<Product> getProducts() {
@@ -47,47 +44,21 @@ public class ProductManager {
 
     public void addProduct(Product product) {
         products.add(product);
-        saveProductsToStorage();
     }
 
     public void updateProduct(int index, Product product) {
         if (index >= 0 && index < products.size()) {
             products.set(index, product);
-            saveProductsToStorage();
         }
     }
 
     public void deleteProduct(int index) {
         if (index >= 0 && index < products.size()) {
             products.remove(index);
-            saveProductsToStorage();
         }
     }
 
-    private void loadProducts() {
-        try {
-            FileInputStream fis = context.openFileInput(PRODUCT_FILE);
-            ObjectInputStream ois = new ObjectInputStream(fis);
-            products = (List<Product>) ois.readObject();
-            ois.close();
-            fis.close();
-            Log.d(TAG, "Products loaded: " + products.size());
-        } catch (Exception e) {
-            Log.e(TAG, "Error loading products", e);
-            products = new ArrayList<>();
-        }
-    }
+    // Không cần loadProducts từ file nữa
 
-    private void saveProductsToStorage() {
-        try {
-            FileOutputStream fos = context.openFileOutput(PRODUCT_FILE, Context.MODE_PRIVATE);
-            ObjectOutputStream oos = new ObjectOutputStream(fos);
-            oos.writeObject(products);
-            oos.close();
-            fos.close();
-            Log.d(TAG, "Products saved to storage");
-        } catch (Exception e) {
-            Log.e(TAG, "Error saving products", e);
-        }
-    }
+    // Không cần saveProductsToStorage nữa
 }

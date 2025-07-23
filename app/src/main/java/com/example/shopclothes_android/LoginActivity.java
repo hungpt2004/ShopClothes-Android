@@ -1,10 +1,13 @@
 package com.example.shopclothes_android;
 
 import android.content.Intent;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.LinearLayout;
+import androidx.viewpager2.widget.ViewPager2;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
@@ -13,7 +16,6 @@ import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import android.util.Log;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
@@ -32,6 +34,7 @@ public class LoginActivity extends AppCompatActivity {
     private TextInputLayout tilEmail, tilPassword;
     private TextInputEditText etEmail, etPassword;
     private MaterialButton btnLogin;
+    private View progressLogin;
     private SignInButton btnGoogleSignin;
     private TextView tvForgotPassword, tvSignup;
     private LinearLayout llSignup;
@@ -43,11 +46,21 @@ public class LoginActivity extends AppCompatActivity {
     private static final int RC_SIGN_IN = 9001;
     private GoogleSignInClient mGoogleSignInClient;
 
+    // Carousel
+    private ViewPager2 vpCarousel;
+    private Handler carouselHandler;
+    private Runnable carouselRunnable;
+    private int carouselInterval = 3000; // 3 seconds
+
+    private View overlayLoading;
+    private View progressOverlay;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
+        // Tạo firebase instance
         mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
         initViews();
@@ -59,6 +72,39 @@ public class LoginActivity extends AppCompatActivity {
                 .requestEmail()
                 .build();
         mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
+
+        // Khởi tạo carousel slide - view pager 2
+        vpCarousel = findViewById(R.id.vp_carousel);
+
+        // Danh sách ảnh hiện trong slide ở trang login
+        String[] imageUrls = {
+                "https://images.unsplash.com/photo-1512436991641-6745cdb1723f",
+                "https://images.unsplash.com/photo-1506744038136-46273834b3fb",
+                "https://images.unsplash.com/photo-1465101046530-73398c7f28ca"
+        };
+
+        CarouselAdapter carouselAdapter = new CarouselAdapter(this, java.util.Arrays.asList(imageUrls));
+        vpCarousel.setAdapter(carouselAdapter);
+
+        // Slide auto run
+        carouselHandler = new Handler(Looper.getMainLooper());
+        carouselRunnable = new Runnable() {
+            @Override
+            public void run() {
+                int nextItem = (vpCarousel.getCurrentItem() + 1) % imageUrls.length;
+                vpCarousel.setCurrentItem(nextItem, true);
+                carouselHandler.postDelayed(this, carouselInterval);
+            }
+        };
+
+        vpCarousel.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
+            @Override
+            public void onPageSelected(int position) {
+                carouselHandler.removeCallbacks(carouselRunnable);
+                carouselHandler.postDelayed(carouselRunnable, carouselInterval);
+            }
+        });
+        carouselHandler.postDelayed(carouselRunnable, carouselInterval);
     }
 
     private void initViews() {
@@ -67,10 +113,20 @@ public class LoginActivity extends AppCompatActivity {
         etEmail = findViewById(R.id.et_email);
         etPassword = findViewById(R.id.et_password);
         btnLogin = findViewById(R.id.btn_login);
+        progressLogin = findViewById(R.id.progress_login);
         btnGoogleSignin = findViewById(R.id.btn_google_signin);
         tvForgotPassword = findViewById(R.id.tv_forgot_password);
         tvSignup = findViewById(R.id.tv_signup);
         llSignup = findViewById(R.id.ll_signup);
+        overlayLoading = findViewById(R.id.overlay_loading);
+        progressOverlay = findViewById(R.id.progress_overlay);
+    }
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (carouselHandler != null && carouselRunnable != null) {
+            carouselHandler.removeCallbacks(carouselRunnable);
+        }
     }
 
     private void setupClickListeners() {
@@ -118,8 +174,9 @@ public class LoginActivity extends AppCompatActivity {
         }
 
         if (isValid) {
-            btnLogin.setText(getString(R.string.loading));
             btnLogin.setEnabled(false);
+            btnLogin.setText("");
+            progressLogin.setVisibility(View.VISIBLE);
 
             // Check for admin login
             if (email.equals(ADMIN_EMAIL) && password.equals(ADMIN_PASSWORD)) {
@@ -132,6 +189,9 @@ public class LoginActivity extends AppCompatActivity {
 
             mAuth.signInWithEmailAndPassword(email, password)
                     .addOnCompleteListener(this, task -> {
+                        progressLogin.setVisibility(View.GONE);
+                        btnLogin.setEnabled(true);
+                        btnLogin.setText(getString(R.string.login));
                         if (task.isSuccessful()) {
                             FirebaseUser firebaseUser = mAuth.getCurrentUser();
                             if (firebaseUser != null) {
@@ -140,8 +200,6 @@ public class LoginActivity extends AppCompatActivity {
                                             Boolean isBanned = document.getBoolean("isBanned");
                                             if (isBanned != null && isBanned) {
                                                 FirebaseAuth.getInstance().signOut();
-                                                btnLogin.setText(getString(R.string.login));
-                                                btnLogin.setEnabled(true);
                                                 Toast.makeText(this, "Your account has been banned.", Toast.LENGTH_LONG)
                                                         .show();
                                             } else {
@@ -170,67 +228,14 @@ public class LoginActivity extends AppCompatActivity {
                                             }
                                         })
                                         .addOnFailureListener(e -> {
-                                            btnLogin.setText(getString(R.string.login));
-                                            btnLogin.setEnabled(true);
-                                            Toast.makeText(this, "Failed to check account status.", Toast.LENGTH_LONG)
-                                                    .show();
+                                            Toast.makeText(this, "Error loading user data.", Toast.LENGTH_SHORT).show();
                                         });
                             }
                         } else {
-                            btnLogin.setText(getString(R.string.login));
-                            btnLogin.setEnabled(true);
-                            Exception e = task.getException();
-                            String errorMsg = getString(R.string.error_login_failed);
-                            if (e != null) {
-                                errorMsg += "\n" + e.getMessage();
-                                Log.e(TAG, "Firebase login failed", e);
-                            }
-                            Toast.makeText(this, errorMsg, Toast.LENGTH_LONG).show();
+                            Toast.makeText(this, getString(R.string.error_login_failed), Toast.LENGTH_SHORT).show();
                         }
                     });
-        }
     }
-
-    private void signInWithGoogle() {
-        Intent signInIntent = mGoogleSignInClient.getSignInIntent();
-        startActivityForResult(signInIntent, RC_SIGN_IN);
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == RC_SIGN_IN) {
-            Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
-            try {
-                GoogleSignInAccount account = task.getResult(ApiException.class);
-                if (account != null) {
-                    firebaseAuthWithGoogle(account.getIdToken());
-                } else {
-                    Toast.makeText(this, "Google sign in failed", Toast.LENGTH_SHORT).show();
-                }
-            } catch (ApiException e) {
-                Toast.makeText(this, "Google sign in failed", Toast.LENGTH_SHORT).show();
-            }
-        }
-    }
-
-    private void firebaseAuthWithGoogle(String idToken) {
-        AuthCredential credential = GoogleAuthProvider.getCredential(idToken, null);
-        mAuth.signInWithCredential(credential)
-                .addOnCompleteListener(this, task -> {
-                    if (task.isSuccessful()) {
-                        FirebaseUser user = mAuth.getCurrentUser();
-                        if (user != null) {
-                            if (task.getResult().getAdditionalUserInfo().isNewUser()) {
-                                createNewUserInFirestore(user);
-                            } else {
-                                fetchAndSaveUser(user.getUid());
-                            }
-                        }
-                    } else {
-                        Toast.makeText(this, "Authentication Failed.", Toast.LENGTH_SHORT).show();
-                    }
-                });
     }
 
     private void createNewUserInFirestore(FirebaseUser firebaseUser) {
@@ -243,7 +248,7 @@ public class LoginActivity extends AppCompatActivity {
                 firebaseUser.getPhotoUrl() != null ? firebaseUser.getPhotoUrl().toString() : "");
         user.put("gender", "Not specified");
         user.put("birthDate", "Not specified");
-        user.put("isBanned", false);
+        user.put("isBanned", false); 
         db.collection("users").document(firebaseUser.getUid()).set(user)
                 .addOnSuccessListener(aVoid -> fetchAndSaveUser(firebaseUser.getUid()))
                 .addOnFailureListener(e -> {
@@ -286,5 +291,45 @@ public class LoginActivity extends AppCompatActivity {
         Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
         startActivity(intent);
         finish();
+    }
+
+    private void signInWithGoogle() {
+        overlayLoading.setVisibility(View.VISIBLE);
+        mGoogleSignInClient.signOut().addOnCompleteListener(this, task -> {
+            Intent signInIntent = mGoogleSignInClient.getSignInIntent();
+            // onActivityResult he thong android goi lai
+            startActivityForResult(signInIntent, RC_SIGN_IN);
+        });
+    }
+
+    // Xử lý kết quả đăng nhập Google
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == RC_SIGN_IN) {
+            Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
+            try {
+                GoogleSignInAccount account = task.getResult(ApiException.class);
+                firebaseAuthWithGoogle(account.getIdToken());
+            } catch (ApiException e) {
+                overlayLoading.setVisibility(View.GONE);
+                Toast.makeText(this, "Google sign in failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    // Đăng nhập Firebase bằng Google token
+    private void firebaseAuthWithGoogle(String idToken) {
+        AuthCredential credential = GoogleAuthProvider.getCredential(idToken, null);
+        mAuth.signInWithCredential(credential)
+            .addOnCompleteListener(this, task -> {
+                overlayLoading.setVisibility(View.GONE);
+                if (task.isSuccessful()) {
+                    FirebaseUser user = mAuth.getCurrentUser();
+                    createNewUserInFirestore(user);
+                } else {
+                    Toast.makeText(this, "Firebase auth failed.", Toast.LENGTH_SHORT).show();
+                }
+            });
     }
 }

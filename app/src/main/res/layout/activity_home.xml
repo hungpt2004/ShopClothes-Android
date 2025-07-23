@@ -64,59 +64,54 @@
 
     </LinearLayout>
 
-    <!-- Banner với overlay và text -->
-    <FrameLayout
+    <!-- RecyclerView suggestion dưới search bar (mặc định ẩn) -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvSearchSuggestions"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/search_container"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginTop="0dp"
+        android:visibility="gone"
+        android:overScrollMode="never"
+        android:background="@android:color/transparent" />
+
+    <!-- Carousel Banner với ViewPager2 -->
+    <androidx.cardview.widget.CardView
         android:id="@+id/banner_container"
         android:layout_width="match_parent"
         android:layout_height="200dp"
         android:layout_below="@id/search_container"
         android:layout_marginStart="16dp"
         android:layout_marginEnd="16dp"
-        android:layout_marginBottom="8dp">
+        android:layout_marginBottom="0dp"
+        app:cardCornerRadius="24dp"
+        app:cardElevation="6dp"
+        app:cardUseCompatPadding="true"
+        android:clipChildren="true"
+        android:clipToPadding="true">
 
-        <!-- Banner Image -->
-        <ImageView
-            android:id="@+id/imgBanner"
+        <androidx.viewpager2.widget.ViewPager2
+            android:id="@+id/bannerViewPager"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@drawable/banner_gradient_bg"
-            android:scaleType="centerCrop"
-            android:src="@drawable/banner" />
+            android:clipToPadding="false"
+            android:clipChildren="false" />
 
-        <!-- Overlay cho banner -->
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@drawable/banner_overlay" />
+    </androidx.cardview.widget.CardView>
 
-        <!-- Text trên banner -->
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom|start"
-            android:layout_margin="16dp"
-            android:orientation="vertical">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="New Collection"
-                android:textColor="@color/background_secondary"
-                android:textSize="24sp"
-                android:textStyle="bold"
-                android:fontFamily="sans-serif-medium" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:text="Up to 50% Off"
-                android:textColor="@color/accent_light"
-                android:textSize="16sp" />
-
-        </LinearLayout>
-
-    </FrameLayout>
+    <!-- Dot indicator nhỏ bên dưới slide -->
+    <LinearLayout
+        android:id="@+id/bannerIndicator"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/banner_container"
+        android:layout_centerHorizontal="true"
+        android:orientation="horizontal"
+        android:layout_marginTop="-12dp"
+        android:layout_marginBottom="8dp"
+        android:gravity="center" />
 
     <!-- Section Header cho Products -->
     <LinearLayout

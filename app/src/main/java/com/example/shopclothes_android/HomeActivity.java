@@ -35,8 +35,12 @@ public class HomeActivity extends AppCompatActivity implements ProductAdapter.Pr
             )
     );
 
-    private ProductAdapter adapter;
-    private BottomNavigationView bottomNavigationView;
+private ProductAdapter adapter;
+private BottomNavigationView bottomNavigationView;
+private RecyclerView rvSearchSuggestions;
+private SearchSuggestionAdapter suggestionAdapter;
+private List<Product> allProducts = new ArrayList<>();
+private List<Product> filteredSuggestions = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,10 +78,15 @@ public class HomeActivity extends AppCompatActivity implements ProductAdapter.Pr
 
         ProductManager productManager = ProductManager.getInstance();
         productManager.initialize(this);
-        List<Product> products = productManager.getProducts();
+        allProducts = productManager.getProducts();
 
-        adapter = new ProductAdapter(products, this);
+        adapter = new ProductAdapter(allProducts, this);
         rvProducts.setAdapter(adapter);
+
+        // Khi click vào search bar, chuyển sang SearchActivity
+        findViewById(R.id.search_container).setOnClickListener(v -> {
+            startActivity(new Intent(HomeActivity.this, SearchActivity.class));
+        });
 
         // Setup bottom navigation
         bottomNavigationView = findViewById(R.id.bottom_navigation);
@@ -98,11 +107,6 @@ public class HomeActivity extends AppCompatActivity implements ProductAdapter.Pr
                 return true;
             }
             return false;
-        });
-
-        // Sự kiện mở SearchActivity khi click vào search bar
-        findViewById(R.id.search_container).setOnClickListener(v -> {
-            startActivity(new Intent(HomeActivity.this, SearchActivity.class));
         });
     }
 

@@ -64,6 +64,19 @@
 
     </LinearLayout>
 
+    <!-- RecyclerView suggestion dưới search bar (mặc định ẩn) -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvSearchSuggestions"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/search_container"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginTop="0dp"
+        android:visibility="gone"
+        android:overScrollMode="never"
+        android:background="@android:color/transparent" />
+
     <!-- Carousel Banner với ViewPager2 -->
     <androidx.cardview.widget.CardView
         android:id="@+id/banner_container"

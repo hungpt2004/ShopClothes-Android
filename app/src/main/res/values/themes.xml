@@ -6,4 +6,9 @@
     </style>
 
     <style name="Theme.ShopClothesAndroid" parent="Base.Theme.ShopClothesAndroid" />
+
+    <!-- Splash theme -->
+    <style name="Theme.ShopClothesAndroid.Splash" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="android:windowBackground">@drawable/splash_screen</item>
+    </style>
 </resources>

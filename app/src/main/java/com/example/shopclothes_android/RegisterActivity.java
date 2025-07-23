@@ -30,6 +30,7 @@ public class RegisterActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
     private static final String TAG = "RegisterActivity";
+    private View progressRegister;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,6 +63,7 @@ public class RegisterActivity extends AppCompatActivity {
         tvSignin = findViewById(R.id.tv_signin);
         tvTermsService = findViewById(R.id.tv_terms_service);
         tvPrivacyPolicy = findViewById(R.id.tv_privacy_policy);
+        progressRegister = findViewById(R.id.progress_register);
     }
 
     private void setupToolbar() {
@@ -104,11 +106,15 @@ public class RegisterActivity extends AppCompatActivity {
         boolean isValid = validateInputs(fullName, email, phone, password, confirmPassword);
 
         if (isValid) {
-            btnCreateAccount.setText(getString(R.string.loading));
+            btnCreateAccount.setText("");
             btnCreateAccount.setEnabled(false);
+            progressRegister.setVisibility(View.VISIBLE);
 
             mAuth.createUserWithEmailAndPassword(email, password)
                     .addOnCompleteListener(this, task -> {
+                        progressRegister.setVisibility(View.GONE);
+                        btnCreateAccount.setEnabled(true);
+                        btnCreateAccount.setText(getString(R.string.create_account_button));
                         if (task.isSuccessful()) {
                             FirebaseUser firebaseUser = mAuth.getCurrentUser();
                             // Set default values
@@ -173,6 +179,7 @@ public class RegisterActivity extends AppCompatActivity {
                         } else {
                             btnCreateAccount.setText(getString(R.string.create_account_button));
                             btnCreateAccount.setEnabled(true);
+                            progressRegister.setVisibility(View.GONE);
                             Exception e = task.getException();
                             String errorMsg = getString(R.string.error_registration_failed);
                             if (e != null) {

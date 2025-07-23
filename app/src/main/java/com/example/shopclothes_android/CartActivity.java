@@ -13,6 +13,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import java.text.NumberFormat;
 import java.util.List;
 import java.util.Locale;
+import com.google.firebase.auth.FirebaseAuth;
 
 public class CartActivity extends AppCompatActivity implements CartAdapter.CartItemListener {
 
@@ -157,8 +158,8 @@ public class CartActivity extends AppCompatActivity implements CartAdapter.CartI
                 .setTitle("Xác nhận thanh toán")
                 .setMessage("Bạn có chắc chắn muốn thanh toán đơn hàng với tổng tiền " + totalAmount + "?")
                 .setPositiveButton("Xác nhận", (dialog, which) -> {
-                    // Save purchase to internal storage
-                    savePurchase();
+                    // Lưu order vào SQLite
+                    saveOrderToDatabase();
 
                     // Clear cart after successful payment
                     cartManager.clearCart();
@@ -173,22 +174,20 @@ public class CartActivity extends AppCompatActivity implements CartAdapter.CartI
                 .show();
     }
 
-    private void savePurchase() {
+    private void saveOrderToDatabase() {
         List<Product> cartItems = cartManager.getCartItems();
         if (!cartItems.isEmpty()) {
-            PurchaseManager purchaseManager = PurchaseManager.getInstance();
-            purchaseManager.initialize(this);
-
-            String userEmail = com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser() != null
-                    ? com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser().getEmail()
-                    : "guest@example.com";
-
-            purchaseManager.savePurchase(
-                    cartItems,
-                    cartManager.getSubtotal(),
-                    cartManager.getShippingFee(),
-                    cartManager.getTotal(),
-                    userEmail);
+            String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+            User user = ProfileManager.getInstance().getCurrentUser();
+            // Nếu User có email thì hash email để làm userId, hoặc giữ mặc định
+            if (user != null && user.getEmail() != null && !user.getEmail().isEmpty()) {
+                userId = String.valueOf(user.getEmail().hashCode());
+            }
+            double totalPrice = cartManager.getTotal();
+            String createdDate = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new java.util.Date());
+            String status = "Đã thanh toán";
+            ProductDatabaseHelper dbHelper = new ProductDatabaseHelper(this);
+            dbHelper.addOrder(userId, cartItems, totalPrice, createdDate, status);
         }
     }
 }

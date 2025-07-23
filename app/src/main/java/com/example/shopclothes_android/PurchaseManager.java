@@ -13,7 +13,7 @@ import java.util.UUID;
 
 public class PurchaseManager {
     private static final String TAG = "PurchaseManager";
-    private static final String PURCHASE_FILE = "purchases.dat";
+    private static final String PURCHASE_FILE = "purchases_product.dat";
     private static PurchaseManager instance;
     private List<Purchase> purchases;
     private Context context;
@@ -86,11 +86,17 @@ public class PurchaseManager {
 
     private void loadPurchases() {
         try {
-            FileInputStream fis = context.openFileInput(PURCHASE_FILE);
-            ObjectInputStream ois = new ObjectInputStream(fis);
-            purchases = (List<Purchase>) ois.readObject();
-            ois.close();
-            fis.close();
+            List<Purchase> loadedPurchases;
+            try (ObjectInputStream ois = new ObjectInputStream(context.openFileInput(PURCHASE_FILE))) {
+                loadedPurchases = (List<Purchase>) ois.readObject();
+            } catch (java.io.FileNotFoundException e) {
+                // File chưa tồn tại, trả về danh sách rỗng
+                loadedPurchases = new ArrayList<>();
+            } catch (Exception e) {
+                Log.e(TAG, "Error loading purchases", e);
+                loadedPurchases = new ArrayList<>();
+            }
+            this.purchases = loadedPurchases;
             Log.d(TAG, "Purchases loaded: " + purchases.size() + " purchases");
         } catch (Exception e) {
             Log.e(TAG, "Error loading purchases", e);
@@ -100,12 +106,14 @@ public class PurchaseManager {
 
     private void savePurchasesToStorage() {
         try {
+            Log.d(TAG, "savePurchasesToStorage: context=" + context);
+            Log.d(TAG, "savePurchasesToStorage: fileName=" + PURCHASE_FILE);
             FileOutputStream fos = context.openFileOutput(PURCHASE_FILE, Context.MODE_PRIVATE);
             ObjectOutputStream oos = new ObjectOutputStream(fos);
             oos.writeObject(purchases);
             oos.close();
             fos.close();
-            Log.d(TAG, "Purchases saved to storage");
+            Log.d(TAG, "Purchases saved to storage at: " + context.getFilesDir().getAbsolutePath() + "/" + PURCHASE_FILE);
         } catch (Exception e) {
             Log.e(TAG, "Error saving purchases", e);
         }

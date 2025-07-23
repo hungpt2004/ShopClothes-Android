@@ -99,11 +99,21 @@ public class ProfileActivity extends AppCompatActivity {
 			btnAddAddress.setOnClickListener(
 					v -> Toast.makeText(this, "Add Address feature coming soon!", Toast.LENGTH_SHORT).show());
 		if (layoutMyOrders != null)
-			layoutMyOrders.setOnClickListener(
-					v -> {
-						Intent intent = new Intent(ProfileActivity.this, PurchaseHistoryActivity.class);
-						startActivity(intent);
-					});
+			layoutMyOrders.setOnClickListener(v -> {
+				// Fetch orders from SQLite
+				ProfileManager profileManager = ProfileManager.getInstance();
+				profileManager.initialize(getApplicationContext());
+				User user = profileManager.getCurrentUser();
+				String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+				if (user != null && user.getEmail() != null && !user.getEmail().isEmpty()) {
+					userId = String.valueOf(user.getEmail().hashCode());
+				}
+				ProductDatabaseHelper dbHelper = new ProductDatabaseHelper(this);
+				java.util.ArrayList<Order> orders = new java.util.ArrayList<>(dbHelper.getOrdersByUserId(userId));
+				Intent intent = new Intent(ProfileActivity.this, PurchaseHistoryActivity.class);
+				intent.putParcelableArrayListExtra("orders", orders);
+				startActivity(intent);
+			});
 		if (layoutWishlist != null)
 			layoutWishlist.setOnClickListener(v -> {
 				if (FavoritesActivity.class != null) {
